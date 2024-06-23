@@ -1,0 +1,4 @@
+name: mockIot
+runtime: nodejs 
+main: main.ts
+description: mock AR Vision IoT device data ingestion

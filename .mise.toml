@@ -1,3 +1,4 @@
 [tools]
 pnpm = "latest"
 node = "20"
+pulumi = "3.119.0"
