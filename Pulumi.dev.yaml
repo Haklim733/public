@@ -1,3 +1,2 @@
 config:
   mockIot:stage: dev
-  mockIot:bucket: mock-iot-data
