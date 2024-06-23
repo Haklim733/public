@@ -3,9 +3,7 @@
 // Script to generate simulated IoT device parameters data
 import { randomInt } from "crypto";
 
-const deviceNames: string[] = ["SBS01", "SBS02", "SBS03", "SBS04", "SBS05"];
-
-interface DeviceData {
+export interface DeviceData {
   positionX: number;
   positionY: number;
   positionZ: number;
@@ -28,9 +26,8 @@ interface DeviceData {
   dateTime: string;
 }
 
-export function generateARVisionData(): DeviceData {
+export function generateARVisionData(deviceId: string): DeviceData {
   const currentTime = new Date().toISOString();
-  const deviceId = deviceNames[randomInt(deviceNames.length)];
 
   return {
     positionX: randomInt(0, 101),
@@ -51,25 +48,22 @@ export function generateARVisionData(): DeviceData {
     imageData: randomInt(0, 256), // Simplified to a grayscale value
     surfaceDetection: !!randomInt(0, 2),
     userInteraction: !!randomInt(0, 2),
-    deviceId,
+    deviceId: deviceId,
     dateTime: currentTime,
   };
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-function timeout(startTime: number, ms: number): boolean {
+export function timeout(startTime: number, ms: number): boolean {
   return Date.now() - startTime > ms; // 600000 milliseconds = 10 minutes
 }
 
-export async function simulateARVisionData() {
-  const startTime = Date.now(); // Get the current time in milliseconds
-  let condition = true;
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-  while (condition) {
-    generateARVisionData();
-    await sleep(1000); // Sleep for 1000 milliseconds (1 second) between calls
-    condition = timeout(startTime, 600000); // Check if the function has been running for 10 minutes
-  }
+export function randomSleep(min: number, max: number): Promise<void> {
+  const sleepTime = getRandomInt(min, max);
+  return new Promise((resolve) => setTimeout(resolve, sleepTime));
 }
