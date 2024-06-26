@@ -50,4 +50,5 @@ const mockIotDevice = new aws.lambda.Function("mockIotDevice", {
     ".": new pulumi.asset.FileArchive("./app"),
   }),
   environment: { variables: { BUCKET: iotBucket.bucket, KEY: "mock/lambda" } },
+  memorySize: 128,
 });
