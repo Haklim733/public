@@ -39,6 +39,8 @@ export const handler = async (
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   const startTime = Date.now(); // Get the current time in milliseconds
+  let body = event.body ? JSON.parse(event.body) : null;
+  let secToRun = body?.secondsToRun;
   let condition = true;
   let bucket = process.env.BUCKET!;
   let batchData: DeviceData[] = [];
@@ -63,6 +65,6 @@ export const handler = async (
       lastBatchTime = Date.now();
     }
     await randomSleep(250, 750); // 1000 milliseconds (1 second)
-    condition = timeout(startTime, 30000); // Check if the function has been running for 10 minutes
+    condition = timeout(startTime, secToRun); // Check if the function has been running for 10 minutes
   }
 };

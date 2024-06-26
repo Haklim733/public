@@ -2,7 +2,7 @@
   "devDependencies": {
     "@pulumi/aws": "^6.41.0",
     "@pulumi/pulumi": "^3.119.0",
-    "@types/aws-lambda": "^8.10.140",
+    "@types/aws-lambda": "8.10.140",
     "@types/node": "^20.14.8",
     "vitest": "^1.6.0"
   },
@@ -10,6 +10,7 @@
     "@aws-sdk/client-iot": "^3.600.0",
     "@aws-sdk/client-iot-data-plane": "^3.600.0",
     "@aws-sdk/client-s3": "^3.600.0",
+    "sst": "ion",
     "uuid": "^10.0.0"
   },
   "scripts": {
