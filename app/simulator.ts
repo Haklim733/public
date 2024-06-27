@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT-0
 
 // Script to generate simulated IoT device parameters data
-import { randomInt } from "crypto";
+import { randomInt, randomBytes } from "crypto";
 
 export interface DeviceData {
   positionX: number;
@@ -66,4 +66,9 @@ function getRandomInt(min, max) {
 export function randomSleep(min: number, max: number): Promise<void> {
   const sleepTime = getRandomInt(min, max);
   return new Promise((resolve) => setTimeout(resolve, sleepTime));
+}
+
+export function generateUniqueToken(): string {
+  const token = randomBytes(32); // Generates 32 bytes of random data
+  return token.toString("hex"); // Converts the token to a hexadecimal string
 }
