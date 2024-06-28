@@ -1,4 +1,4 @@
-import { Resource } from "sst";
+import { Config } from "sst/node/config";
 import type { APIGatewayTokenAuthorizerEvent, Context } from "aws-lambda";
 
 interface AuthPolicyDocument {
@@ -48,7 +48,8 @@ export const handler = async (
   let apiKey = "";
   if (authorization) {
     apiKey = authorization.slice(7); // Remove "Bearer " prefix
-    if (apiKey === Resource.TestIotApiToken.value) {
+    console.log(Config.API_TOKEN);
+    if (apiKey === Config.API_TOKEN) {
       return generatePolicy("user", "Allow", methodArn);
     }
   }
