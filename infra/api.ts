@@ -57,7 +57,7 @@ export function api({ stack, app }: StackContext) {
       myAuthorizer: {
         type: "lambda",
         function: new Function(stack, "Authorizer", {
-          handler: "packages/functions/apiAuthorizer.handler",
+          handler: "app/apiAuthorizer.handler",
           timeout: 5,
           memorySize: 128,
           bind: [secret],
