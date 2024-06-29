@@ -10,7 +10,7 @@ export default {
     }
 
     return {
-      name: "orchard",
+      name: "mockIot",
       region: "us-west-1",
       profile: process.env.aws_profile,
       stage: stage,
@@ -18,7 +18,7 @@ export default {
   },
   stacks(app) {
     if (app.stage !== "production") {
-      app.setDefaultRemovalPolicy("removal");
+      app.setDefaultRemovalPolicy("destroy");
     }
     app.stack(api).stack(site);
     app.setDefaultFunctionProps({
