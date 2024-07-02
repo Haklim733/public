@@ -11,33 +11,6 @@ import {
 import * as cdk from "aws-cdk-lib";
 
 export function myApi({ stack, app }: StackContext) {
-  const getCors = (stack: Stack): ApiCorsProps => {
-    console.log(`api: ${stack.stage}`);
-    if (app.stage === "dev") {
-      return {
-        allowCredentials: true,
-        allowHeaders: [
-          "Content-Type",
-          "X-Amz-Date",
-          "Authorization",
-          "X-Api-Key",
-          "X-Amz-Security-Token",
-          "Set-Cookie",
-        ],
-        allowMethods: ["GET", "POST", "OPTIONS"],
-        allowOrigins: ["http://localhost:5173/"],
-        exposeHeaders: ["Date", "x-api-id"],
-      };
-    }
-
-    return {
-      allowCredentials: true,
-      allowHeaders: ["Content-Type", "X-Amz-Date", "Authorization"],
-      allowMethods: ["GET", "POST", "OPTIONS"],
-      exposeHeaders: ["Date", "x-api-id"],
-    };
-  };
-
   const bucket = new Bucket(stack, "dataBucket", {
     blockPublicACLs: true,
     cdk: {
@@ -79,7 +52,6 @@ export function myApi({ stack, app }: StackContext) {
     accessLog: {
       retention: "six_months",
     },
-    cors: getCors(stack),
     routes: {
       "POST /iot/simulate": {
         function: {
