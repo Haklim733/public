@@ -13,6 +13,7 @@ export function site({ stack }: StackContext) {
     },
     cdk: {
       bucket: {
+        autoDeleteObjects: true,
         removalPolicy: RemovalPolicy.DESTROY,
       },
     },
