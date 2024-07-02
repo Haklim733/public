@@ -57,8 +57,13 @@ export function myApi({ stack, app }: StackContext) {
         function: {
           handler: "app/index.handler",
         },
+        memorySize: 256,
+        timeout: 60 * 10,
       },
     },
+  });
+  stack.addOutputs({
+    url: api.url,
   });
   return {
     api,

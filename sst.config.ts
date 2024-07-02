@@ -3,9 +3,9 @@ import { myApi } from "./infra/api";
 import { site } from "./infra/site";
 
 export default {
-  config(input) {
-    let stage = input.stage;
-    if (input.stage === undefined) {
+  config(_input) {
+    let stage = _input.stage;
+    if (_input.stage === undefined) {
       stage = "dev";
     }
 
