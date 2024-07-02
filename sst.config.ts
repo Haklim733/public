@@ -17,9 +17,6 @@ export default {
     };
   },
   stacks(app) {
-    if (app.stage !== "production") {
-      app.setDefaultRemovalPolicy("destroy");
-    }
     app.stack(myApi).stack(site);
     app.setDefaultFunctionProps({
       timeout: 5,
