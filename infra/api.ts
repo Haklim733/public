@@ -7,21 +7,10 @@ import {
   Stack,
   StackContext,
 } from "sst/constructs";
+
 import * as cdk from "aws-cdk-lib";
 
-export function api({ stack, app }: StackContext) {
-  const bucket = new Bucket(stack, "dataBucket", {
-    blockPublicACLs: true,
-    cdk: {
-      bucket: {
-        autoDeleteObjects: true,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-      },
-    },
-  });
-
-  const secret = new Config.Secret(stack, "TestIoTApiToken");
-
+export function myApi({ stack, app }: StackContext) {
   const getCors = (stack: Stack): ApiCorsProps => {
     console.log(`api: ${stack.stage}`);
     if (app.stage === "dev") {
@@ -45,12 +34,21 @@ export function api({ stack, app }: StackContext) {
       allowCredentials: true,
       allowHeaders: ["Content-Type", "X-Amz-Date", "Authorization"],
       allowMethods: ["GET", "POST", "OPTIONS"],
-      allowOrigins: [`https://${dns!.domain}`],
       exposeHeaders: ["Date", "x-api-id"],
     };
   };
 
-  let domainStage = ["prod"];
+  const bucket = new Bucket(stack, "dataBucket", {
+    blockPublicACLs: true,
+    cdk: {
+      bucket: {
+        autoDeleteObjects: true,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      },
+    },
+  });
+
+  const secret = new Config.Secret(stack, "TestIoTApiToken");
 
   const api = new Api(stack, "Api", {
     authorizers: {
@@ -83,13 +81,14 @@ export function api({ stack, app }: StackContext) {
     },
     cors: getCors(stack),
     routes: {
-      "ANY /iot/simulate": {
+      "POST /iot/simulate": {
         function: {
           handler: "app/index.handler",
         },
       },
     },
   });
+  console.log(api.url);
   return {
     api,
   };

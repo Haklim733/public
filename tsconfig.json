@@ -1,1 +1,28 @@
-{}
+{
+  "allowJs": false,
+  "skipLibCheck": true,
+  "forceConsistentCasingInFileNames": true,
+  // "noEmit": true,
+  "noImplicitReturns": true,
+  "noUnusedLocals": true,
+  "noUnusedParameters": true,
+  "resolveJsonModule": true,
+  "isolatedModules": true,
+  "incremental": true,
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "strict": true,
+    "types": ["vitest/importMeta"],
+    "allowSyntheticDefaultImports": true,
+    "target": "es6",
+    "noUncheckedIndexedAccess": true,
+    "declaration": true, 
+    "baseUrl": ".",
+  },
+  "exclude": [
+    "lib/**",
+    "**/node_modules/**",
+  ],
+}

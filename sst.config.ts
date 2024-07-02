@@ -1,5 +1,5 @@
 import { SSTConfig } from "sst";
-import { api } from "./infra/api";
+import { myApi } from "./infra/api";
 import { site } from "./infra/site";
 
 export default {
@@ -20,7 +20,7 @@ export default {
     if (app.stage !== "production") {
       app.setDefaultRemovalPolicy("destroy");
     }
-    app.stack(api).stack(site);
+    app.stack(myApi).stack(site);
     app.setDefaultFunctionProps({
       timeout: 5,
       memorySize: 128,
