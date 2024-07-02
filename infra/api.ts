@@ -61,9 +61,6 @@ export function myApi({ stack, app }: StackContext) {
         timeout: 60 * 10,
       },
     },
-    cors: {
-      allowedMethods: ["GET", "POST"],
-    },
   });
   stack.addOutputs({
     url: api.url,
