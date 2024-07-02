@@ -60,7 +60,6 @@ export function myApi({ stack, app }: StackContext) {
       },
     },
   });
-  console.log(api.url);
   return {
     api,
   };

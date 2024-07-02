@@ -22,7 +22,7 @@
     "baseUrl": ".",
   },
   "exclude": [
-    "lib/**",
+    "app/**",
     "**/node_modules/**",
   ],
 }
