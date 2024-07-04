@@ -28,7 +28,7 @@ export function myApi({ stack, app }: StackContext) {
       myAuthorizer: {
         type: "lambda",
         function: new Function(stack, "Authorizer", {
-          handler: "app/apiAuthorizer.handler",
+          handler: "packages/functions/src/apiAuthorizer.handler",
           timeout: 5,
           memorySize: 128,
           bind: [secret],
@@ -55,7 +55,7 @@ export function myApi({ stack, app }: StackContext) {
     routes: {
       "POST /iot/simulate": {
         function: {
-          handler: "app/index.handler",
+          handler: "packages/functions/src/index.handler",
         },
         memorySize: 256,
         timeout: 60 * 10,
