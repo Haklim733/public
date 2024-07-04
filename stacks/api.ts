@@ -1,4 +1,13 @@
-import { Api, Bucket, Config, Function, StackContext } from "sst/constructs";
+import {
+  Api,
+  ApiCorsProps,
+  Bucket,
+  Config,
+  Function,
+  Stack,
+  StackContext,
+} from "sst/constructs";
+
 import * as cdk from "aws-cdk-lib";
 
 export function myApi({ stack, app }: StackContext) {
@@ -44,20 +53,17 @@ export function myApi({ stack, app }: StackContext) {
       retention: "six_months",
     },
     routes: {
-      "POST  /calculate": {
+      "POST /iot/simulate": {
         function: {
-          handler: "packages/functions/calculate.handler",
-          runtime: "nodejs20.x",
-          memorySize: 256,
-          nodejs: {
-            install: ["duckdb-async"],
-          },
+          handler: "packages/functions/src/index.handler",
         },
+        memorySize: 256,
+        timeout: 60 * 10,
       },
     },
   });
   stack.addOutputs({
-    apiEndpoint: api.url,
+    url: api.url,
   });
   return {
     api,

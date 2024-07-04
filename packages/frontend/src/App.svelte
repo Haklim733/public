@@ -1,4 +1,5 @@
 <script>
+  import svelteLogo from './assets/svelte.svg'
   async function callApiLambda() {
     console.log(import.meta.env.VITE_APP_API_URL)
     try {
@@ -28,6 +29,7 @@
 <main>
   <div>
     <a href="https://svelte.dev" target="_blank" rel="noreferrer">
+      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
     </a>
   </div>
   <h1>Vite + Svelte</h1>
