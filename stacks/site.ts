@@ -1,16 +1,14 @@
-import { StaticSite, StackContext, use } from "sst/constructs";
+import { SvelteKitSite, StackContext, use } from "sst/constructs";
 import { myApi } from "./api";
 import { RemovalPolicy } from "aws-cdk-lib";
 
 export function site({ stack }: StackContext) {
-  const api = use(myApi);
-  const site = new StaticSite(stack, "StaticSite", {
+  const myapi = use(myApi);
+  const site = new SvelteKitSite(stack, "StaticSite", {
     path: "packages/frontend",
     buildCommand: "pnpm run build",
-    buildOutput: "dist",
-    bind: [api],
     environment: {
-      VITE_APP_API_URL: api.url,
+      VITE_APP_API_URL: myapi.api.url,
     },
     cdk: {
       bucket: {
@@ -25,7 +23,6 @@ export function site({ stack }: StackContext) {
   });
   stack.addOutputs({
     SiteUrl: site.url,
-    ApiEndpoint: api.url,
   });
   return {
     site: site,
