@@ -9,7 +9,7 @@ export default {
     }
     return {
       name: "mockIot",
-      region: "us-west-1",
+      region: "us-east-1",
       stage: _input.stage, // Corrected line
     };
   },
