@@ -60,6 +60,9 @@ importers:
 
   packages/functions:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.608.0
+        version: 3.609.0(aws-crt@1.21.3)
       aws-sdk:
         specifier: ^2.1654.0
         version: 2.1654.0
