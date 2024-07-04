@@ -4,13 +4,9 @@ import { site } from "./stacks/site";
 
 export default {
   config(_input) {
-    if (_input.stage === undefined) {
-      _input.stage = "dev";
-    }
     return {
       name: "mockIot",
       region: "us-east-1",
-      stage: _input.stage, // Corrected line
     };
   },
   stacks(app) {
