@@ -1,9 +1,9 @@
 <script>
   import svelteLogo from './assets/svelte.svg'
   async function callApiLambda() {
-    console.log(import.meta.VITE_API_URL);
+    console.log(import.meta.env.VITE_APP_API_URL)
     try {
-      const response = await fetch(`${import.meta.VITE_API_URL}/iot/simulate`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/iot/simulate`, {
         method: 'POST', // or 'GET', depending on your Lambda setup
         headers: {
           'Content-Type': 'application/json',
@@ -33,7 +33,7 @@
     </a>
   </div>
   <h1>Vite + Svelte</h1>
-  <h3> {import.meta.env.VITE_API_URL} </h3>
+  <h3> API URL IS: {import.meta.env.VITE_APP_API_URL} </h3>
   <button on:click={callApiLambda}>Invoke API Lambda</button>
 
 </main>
