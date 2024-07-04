@@ -1,12 +1,4 @@
-import {
-  Api,
-  ApiCorsProps,
-  Bucket,
-  Config,
-  Function,
-  Stack,
-  StackContext,
-} from "sst/constructs";
+import { Api, Bucket, Config, Function, StackContext } from "sst/constructs";
 
 import * as cdk from "aws-cdk-lib";
 
@@ -56,14 +48,14 @@ export function myApi({ stack, app }: StackContext) {
       "POST /iot/simulate": {
         function: {
           handler: "packages/functions/src/index.handler",
+          memorySize: 256,
+          timeout: 60 * 10,
         },
-        memorySize: 256,
-        timeout: 60 * 10,
       },
     },
   });
   stack.addOutputs({
-    url: api.url,
+    apiEndPoint: api.url,
   });
   return {
     api,

@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "sst bind vite",
-    "build": "vite build",
+    "dev": "sst bind vite dev --silent=false",
+    "build": "vite build --mode=development",
     "serve": "vite preview"
   },
   "devDependencies": {

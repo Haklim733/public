@@ -8,9 +8,8 @@ export function site({ stack }: StackContext) {
     path: "packages/frontend",
     buildCommand: "pnpm run build",
     buildOutput: "dist",
-    bind: [api],
     environment: {
-      VITE_APP_API_URL: api.url,
+      VITE_APP_API_URL: api.api.url,
     },
     cdk: {
       bucket: {
@@ -25,7 +24,7 @@ export function site({ stack }: StackContext) {
   });
   stack.addOutputs({
     SiteUrl: site.url,
-    ApiEndpoint: api.url,
+    ApiEndpoint: api.api.url,
   });
   return {
     site: site,
