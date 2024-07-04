@@ -1,56 +1,36 @@
 <script>
-  import svelteLogo from './assets/svelte.svg'
-  async function callApiLambda() {
-    console.log(import.meta.env.VITE_APP_API_URL)
-    try {
-      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/iot/simulate`, {
-        method: 'POST', // or 'GET', depending on your Lambda setup
-        headers: {
-          'Content-Type': 'application/json',
-          // Include other headers as required by your API
-        },
-        body: JSON.stringify({
-          // Your request body here, if needed
-        }),
-      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log(data); // Process your response data here
-    } catch (error) {
-      console.error("Failed to call API Lambda:", error);
-    }
+  function onClick() {
+    fetch(import.meta.env.VITE_APP_API_URL, {
+      method: "POST",
+    })
+      .then((response) => response.text())
+      .then((data) => {
+        count = data;
+    });
   }
 </script>
 
-<main>
+<div class="App">
   <div>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
+    <p> See Iot Graph </p>
+    <button on:click={onClick}>Click Me!</button>
   </div>
-  <h1>Vite + Svelte</h1>
-  <h3> API URL IS: {import.meta.env.VITE_APP_API_URL} </h3>
-  <button on:click={callApiLambda}>Invoke API Lambda</button>
-
-</main>
-
+</div>
 
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+  .App {
+    height: 100vh;
+    display: grid;
+    text-align: center;
+    place-items: center;
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
+  p {
+    margin-top: 0;
+    font-size: 20px;
   }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
+  button {
+    font-size: 48px;
   }
 </style>
