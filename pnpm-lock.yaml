@@ -59,6 +59,13 @@ importers:
         version: 5.3.3(@types/node@20.14.9)
 
   packages/functions:
+    dependencies:
+      aws-sdk:
+        specifier: ^2.1654.0
+        version: 2.1654.0
+      uuid:
+        specifier: ^10.0.0
+        version: 10.0.0
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.140
@@ -1437,8 +1444,8 @@ packages:
     resolution: {integrity: sha512-qvx8C7EQRbP+aDHPDtEH1WZfPplZDZOgExdCqjIgAFds3gZRqumny1Kwf1Kus5TVWGuDHFWOfU0niq35qVfItQ==}
     engines: {node: '>=8.17.0'}
 
-  aws-sdk@2.1653.0:
-    resolution: {integrity: sha512-9f42kuLpMcL1EPZOsLM8u6wlnOMtFwED1b24SN0fBbi/N7N1xTLZ7vbEMt/haz06Lc3Vr3VMDyv0atfMmkboBw==}
+  aws-sdk@2.1654.0:
+    resolution: {integrity: sha512-b5ryvXipBJod9Uh1GUfQNgi5tIIiluxJbyqr/hZ/mr5U8WxrrfjVq3nGnx5JjevFKYRqXIywhumsVyanfACzFA==}
     engines: {node: '>= 10.0.0'}
 
   axios@1.7.2:
@@ -5478,7 +5485,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  aws-sdk@2.1653.0:
+  aws-sdk@2.1654.0:
     dependencies:
       buffer: 4.9.2
       events: 1.1.1
@@ -5569,7 +5576,7 @@ snapshots:
   buffer@4.9.2:
     dependencies:
       base64-js: 1.5.1
-      ieee754: 1.1.13
+      ieee754: 1.2.1
       isarray: 1.0.0
 
   buffer@5.7.1:
@@ -5607,7 +5614,7 @@ snapshots:
       '@aws-cdk/cloud-assembly-schema': 2.142.1
       '@aws-cdk/cx-api': 2.142.1(@aws-cdk/cloud-assembly-schema@2.142.1)
       archiver: 5.3.2
-      aws-sdk: 2.1653.0
+      aws-sdk: 2.1654.0
       glob: 7.2.3
       mime: 2.6.0
       yargs: 16.2.0
@@ -6951,7 +6958,7 @@ snapshots:
       adm-zip: 0.5.14
       aws-cdk-lib: 2.142.1(constructs@10.3.0)
       aws-iot-device-sdk: 2.2.14
-      aws-sdk: 2.1653.0
+      aws-sdk: 2.1654.0
       builtin-modules: 3.2.0
       cdk-assets: 2.142.1
       chalk: 5.3.0
