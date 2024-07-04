@@ -17,10 +17,6 @@ export function site({ stack }: StackContext) {
         removalPolicy: RemovalPolicy.DESTROY,
       },
     },
-    dev: {
-      url: "http://localhost:5173",
-      deploy: false,
-    },
   });
   stack.addOutputs({
     SiteUrl: site.url,
