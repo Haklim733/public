@@ -1,13 +1,13 @@
 {
+  "name": "test-mockIot",
   "type": "module",
   "private": "true",
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.1.1",
+    "@tsconfig/node20": "^20.1.4",
     "@types/aws-lambda": "8.10.140",
     "@types/node": "^20.14.9",
     "aws-cdk-lib": "2.142.1",
     "node-fetch": "^3.3.2",
-    "svelte": "^4.2.18",
     "vite": "^5.3.2",
     "vitest": "^1.6.0"
   },
@@ -21,16 +21,13 @@
   "scripts": {
     "test": "vitest",
     "test:watch": "vitest watch",
-    "dev": "sst bind vite",
-    "build": "sst bind vite build",
-    "preview": "vite preview",
+    "dev": "sst dev",
+    "build": "sst build",
     "deploy": "sst deploy",
     "remove": "sst remove",
     "console": "sst console",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "typecheck": "tsc --noEmit",
     "lint": " prettier --plugin-search-dir . --write './src/**/*.{json,ts}' && eslint './src/**/*.{test,spec}.{ts}' --fix --max-warnings=3 --no-error-on-unmatched-pattern",
-    "test:integration": "playwright test",
     "test:unit": "vitest --run --exclude '**/integ/**'",
     "coverage": "vitest run --coverage"
   }

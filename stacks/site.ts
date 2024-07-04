@@ -5,9 +5,9 @@ import { RemovalPolicy } from "aws-cdk-lib";
 export function site({ stack }: StackContext) {
   const api = use(myApi);
   const site = new StaticSite(stack, "StaticSite", {
-    path: ".",
-    buildOutput: "dist",
+    path: "packages/frontend",
     buildCommand: "pnpm run build",
+    buildOutput: "dist",
     environment: {
       VITE_API_URL: api.api.url,
     },
@@ -23,7 +23,8 @@ export function site({ stack }: StackContext) {
     },
   });
   stack.addOutputs({
-    url: api.url,
+    SiteUrl: site.url,
+    ApiEndpoint: api.url,
   });
   return {
     site: site,
