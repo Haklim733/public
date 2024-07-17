@@ -1,35 +1,22 @@
 {
-  "name": "test-mockIot",
+  "name": "test-svelte-app",
+  "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "private": "true",
-  "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
-    "sst": "^2.43.3",
-    "aws-cdk-lib": "2.142.1",
-    "constructs": "10.3.0",
-    "typescript": "^5.5.3",
-    "@types/aws-lambda": "8.10.140",
-    "@types/node": "^20.14.9",
-    "node-fetch": "^3.3.2",
-    "vitest": "^1.6.0"
-  },
-  "dependencies": {
-    "@aws-sdk/client-iot": "^3.608.0",
-    "@aws-sdk/client-iot-data-plane": "^3.606.0",
-    "@aws-sdk/client-s3": "^3.608.0"
-  },
   "scripts": {
-    "test": "vitest",
-    "test:watch": "vitest watch",
     "dev": "sst dev",
     "build": "sst build",
     "deploy": "sst deploy",
     "remove": "sst remove",
     "console": "sst console",
-    "typecheck": "tsc --noEmit",
-    "lint": " prettier --plugin-search-dir . --write './src/**/*.{json,ts}' && eslint './src/**/*.{test,spec}.{ts}' --fix --max-warnings=3 --no-error-on-unmatched-pattern",
-    "test:unit": "vitest --run --exclude '**/integ/**'",
-    "coverage": "vitest run --coverage"
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "sst": "^2.43.3",
+    "aws-cdk-lib": "2.142.1",
+    "constructs": "10.3.0",
+    "typescript": "^5.5.3",
+    "@tsconfig/node18": "^18.2.4"
   },
   "workspaces": [
     "packages/*"

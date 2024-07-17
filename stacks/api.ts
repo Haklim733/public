@@ -1,8 +1,16 @@
-import { Api, Bucket, Config, Function, StackContext } from "sst/constructs";
-
+import {
+  Api,
+  Bucket,
+  Config,
+  Function,
+  StackContext,
+  use,
+} from "sst/constructs";
 import * as cdk from "aws-cdk-lib";
+import { DNS } from "./dns";
 
-export function myApi({ stack, app }: StackContext) {
+export function TestApi({ stack }: StackContext) {
+  const dns = use(DNS);
   const bucket = new Bucket(stack, "dataBucket", {
     blockPublicACLs: true,
     cdk: {
@@ -14,7 +22,6 @@ export function myApi({ stack, app }: StackContext) {
   });
 
   const secret = new Config.Secret(stack, "TestIoTApiToken");
-
   const api = new Api(stack, "Api", {
     authorizers: {
       myAuthorizer: {
@@ -34,15 +41,22 @@ export function myApi({ stack, app }: StackContext) {
         memorySize: 256,
         bind: [bucket],
         permissions: [bucket],
-        environment: { STAGE: app.stage },
+        environment: { STAGE: stack.stage },
       },
       throttle: {
-        rate: app.stage === "production" ? 20 : 10,
-        burst: app.stage === "production" ? 40 : 20,
+        rate: stack.stage === "prod" ? 20 : 10,
+        burst: stack.stage === "prod" ? 40 : 20,
       },
     },
     accessLog: {
-      retention: "six_months",
+      retention: "one_month",
+    },
+    cors: {
+      allowCredentials: true,
+      allowHeaders: ["Content-Type", "X-Amz-Date", "Authorization"],
+      allowMethods: ["GET", "POST", "OPTIONS"],
+      allowOrigins: [`https://${dns!.domainName}`],
+      exposeHeaders: ["Date", "x-api-id"],
     },
     routes: {
       "POST /iot/simulate": {
@@ -53,11 +67,8 @@ export function myApi({ stack, app }: StackContext) {
         },
       },
     },
+    customDomain: "api." + dns.domain,
   });
-  stack.addOutputs({
-    apiEndPoint: api.url,
-  });
-  return {
-    api,
-  };
+
+  return { api };
 }

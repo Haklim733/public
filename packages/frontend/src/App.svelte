@@ -1,23 +1,19 @@
 <script>
 
   function onClick() {
-    fetch(import.meta.env.VITE_APP_API_URL, {
+    fetch(`${import.meta.env.VITE_APP_API_URL}/iot/simulate`, {
       method: "POST",
     })
       .then((response) => response.text())
-      .then((data) => {
-        count = data;
-    });
-  }
+  };
 </script>
 
 <div class="App">
   <div>
     <p> See Iot Graph </p>
-    <button on:click={onClick}>Click Me!</button>
+    <button on:click={onClick}>Click to simulate iot Data feed!</button>
   </div>
 </div>
-
 
 <style>
   .App {

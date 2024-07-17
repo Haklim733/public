@@ -1,15 +1,16 @@
 import { SSTConfig } from "sst";
-import { myApi } from "./stacks/api";
-import { site } from "./stacks/site";
+import { DNS } from "./stacks/dns";
+import { TestApi } from "./stacks/api";
+import { TestSite } from "./stacks/site";
 
 export default {
   config(_input) {
     return {
-      name: "mockIot",
-      region: "us-east-1",
+      name: "mock-iot",
+      region: "us-west-1",
     };
   },
   stacks(app) {
-    app.stack(myApi).stack(site);
+    app.stack(DNS).stack(TestApi).stack(TestSite);
   },
 } satisfies SSTConfig;

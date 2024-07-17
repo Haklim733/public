@@ -32,12 +32,9 @@ async function writeToS3(
   }
 }
 
-export const handler = async (
+export async function handler(
   event: APIGatewayProxyEventV2
-): Promise<void | APIGatewayProxyStructuredResultV2> => {
-  function sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+): Promise<void | APIGatewayProxyStructuredResultV2> {
   const startTime = Date.now(); // Get the current time in milliseconds
   let body = event.body ? JSON.parse(event.body) : null;
   let secToRun = body?.secondsToRun;
@@ -67,4 +64,4 @@ export const handler = async (
     await randomSleep(250, 750); // 1000 milliseconds (1 second)
     condition = timeout(startTime, secToRun); // Check if the function has been running for 10 minutes
   }
-};
+}
