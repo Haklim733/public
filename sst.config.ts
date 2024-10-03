@@ -1,16 +1,16 @@
-import { SSTConfig } from "sst";
-import { DNS } from "./stacks/dns";
-import { TestApi } from "./stacks/api";
-import { TestSite } from "./stacks/site";
+/// <reference path="./.sst/platform/config.d.ts" />
 
-export default {
-  config(_input) {
+export default $config({
+  app(input) {
     return {
-      name: "mock-iot",
+      name: "mockIot",
+      removal: input?.stage === "prod" ? "retain" : "remove",
+      home: "aws",
       region: "us-west-1",
     };
   },
-  stacks(app) {
-    app.stack(DNS).stack(TestApi).stack(TestSite);
+  async run() {
+    const frontend = await import("./infra/frontend");
+    return {};
   },
-} satisfies SSTConfig;
+});

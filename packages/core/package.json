@@ -1,5 +1,5 @@
 {
-  "name": "@test-svelte-app/core",
+  "name": "@mockIot/core",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -7,8 +7,9 @@
     "typecheck": "tsc -noEmit"
   },
   "devDependencies": {
-    "vitest": "^1.6.0",
     "@types/node": "^20.14.9",
-    "sst": "^2.43.3"
+    "@types/uuid": "^10.0.0",
+    "sst": "^3.1.61",
+    "vitest": "^1.6.0"
   }
 }

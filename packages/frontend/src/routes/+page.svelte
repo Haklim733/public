@@ -1,11 +1,5 @@
 <script>
 
-  function onClick() {
-    fetch(`${import.meta.env.VITE_APP_API_URL}/iot/simulate`, {
-      method: "POST",
-    })
-      .then((response) => response.text())
-  };
 </script>
 
 <div class="App">
