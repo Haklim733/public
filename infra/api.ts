@@ -59,7 +59,7 @@ export const apiFunction = new sst.aws.Function("MyApiFunction", {
 export const router = new sst.aws.Router("MyRouter", {
   domain: {
     dns: sst.aws.dns({
-      zone: $app.stage === "prod" ? "Z0683331M03T5C76HLAI" : "Z05986471IOMVWWKG8GGL",
+      zone: $app.stage === "prod" ? "Z0140882217FY9MCT4KM1" : "Z1048110TMWW9X3WITD5",
     }),
     name: $app.stage === "prod" ? "iot.iamlim.com" : "iot.dev.iamlim.com",
   },

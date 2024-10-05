@@ -21,13 +21,14 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.130",
     "@types/bun": "^1.1.10",
-    "constructs": "10.3.0",
     "dotenv": "^16.3.1",
-    "sst": "^3.1.61",
     "typescript": "^5.3.3",
     "vitest": "^1.1.1"
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "sst": "^3.1.64"
+  }
 }
