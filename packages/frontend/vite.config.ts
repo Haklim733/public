@@ -3,14 +3,13 @@ import { defineConfig } from 'vite';
 import path from 'path';
 
 async function getConfig() {
-  const sveltekitPlugin = await sveltekit();
 
   return defineConfig({
-    plugins: [sveltekitPlugin],
+    plugins: [sveltekit()],
     resolve: {
-      alias: {
-        '@mockIot/core': path.resolve(__dirname, '../core/src')
-      }
+      // alias: {
+      //   '@mockIot/core': path.resolve(__dirname, '../core/src')
+      // }
     }
   });
 }

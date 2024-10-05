@@ -1,4 +1,4 @@
-let redirects: string[] = [];
+import {stream} from "./kinesis"
 
 export const site = new sst.aws.SvelteKit("MockIotSite", {
   dev: {
@@ -6,15 +6,12 @@ export const site = new sst.aws.SvelteKit("MockIotSite", {
   },
   buildCommand: "bun run build",
   environment: {
-    VITE_STAGE: $app.stage,
+    VITE_STAGE: $app.stage, 
+    VITE_DOMAIN: $app.stage === "prod" ? "iot.iamlim.com" : "iot.dev.iamlim.com",
   },
-  link: [],
+  link: [stream],
   path: "packages/frontend",
   permissions: [
-    // {
-    // actions: ["lambda:InvokeFunction"],
-    // resources: [apiFunction.arn],
-    // },
   ],
   server: {
     memory: "512 MB",

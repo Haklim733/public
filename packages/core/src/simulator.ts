@@ -4,6 +4,7 @@
 import { randomInt, randomBytes } from "crypto";
 
 export interface DeviceData {
+  type: "AR";
   positionX: number;
   positionY: number;
   positionZ: number;
@@ -57,7 +58,7 @@ export function timeout(startTime: number, ms: number): boolean {
   return Date.now() - startTime > ms; // 600000 milliseconds = 10 minutes
 }
 
-function getRandomInt(min, max) {
+function getRandomInt(min: number, max: number) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;

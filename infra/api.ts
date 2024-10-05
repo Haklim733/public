@@ -40,7 +40,7 @@ export const apiFunction = new sst.aws.Function("MyApiFunction", {
   url: {
     cors: {
       allowMethods: ["GET", "HEAD"],
-      allowOrigins: $app.stage==="prod" ? ["iot.iamlim.com"] : ["dev.iot.iamlim.com"],
+      allowOrigins: $app.stage==="prod" ? ["https://iot.iamlim.com"] : ["https://dev.iot.iamlim.com"],
       exposeHeaders: exposeHeaders,
       allowHeaders: allowHeaders,
     },

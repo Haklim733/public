@@ -9,5 +9,22 @@ declare module "sst" {
       "type": "sst.aws.SvelteKit"
       "url": string
     }
+    "MyApiFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "MyAppBucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
+    "MyRouter": {
+      "type": "sst.aws.Router"
+      "url": string
+    }
+    "mockIotStream": {
+      "name": string
+      "type": "sst.aws.KinesisStream"
+    }
   }
 }
