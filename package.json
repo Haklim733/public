@@ -1,35 +1,35 @@
 {
-  "name": "mock-iot",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "engines": {
-    "node": ">=20"
-  },
-  "scripts": {
-    "dev": "sst dev",
-    "build": "sst build",
-    "start": "sst start",
-    "lint": "lint",
-    "compile": "bun run -T tsc --build --verbose",
-    "format": "prettier --write .",
-    "tc:root": "vitest --typecheck --exclude '**/{test,integ}.*' --run",
-    "tc:frontend": "bun workspace frontend check",
-    "test": "vitest",
-    "typecheck": "bun tc:root && bun tc:frontend"
-  },
-  "devDependencies": {
-    "@types/aws-lambda": "^8.10.130",
-    "@types/bun": "^1.1.10",
-    "dotenv": "^16.3.1",
-    "typescript": "^5.3.3",
-    "vitest": "^1.1.1"
-  },
-  "workspaces": [
-    "packages/*"
-  ],
-  "dependencies": {
-    "@aws-sdk/client-kinesis": "^3.665.0",
-    "sst": "^3.1.64"
-  }
+	"name": "mock-iot",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"dev": "sst dev",
+		"build": "sst build",
+		"start": "sst start",
+		"lint": "lint",
+		"compile": "bun run -T tsc --build --verbose",
+		"format": "prettier --write .",
+		"tc:root": "vitest --typecheck --exclude '**/{test,integ}.*' --run",
+		"tc:frontend": "bun workspace frontend check",
+		"test": "vitest",
+		"typecheck": "bun tc:root && bun tc:frontend"
+	},
+	"devDependencies": {
+		"@types/aws-lambda": "^8.10.130",
+		"@types/bun": "^1.1.10",
+		"dotenv": "^16.3.1",
+		"typescript": "^5.3.3",
+		"vitest": "^1.1.1"
+	},
+	"workspaces": [
+		"packages/*"
+	],
+	"dependencies": {
+		"@aws-sdk/client-kinesis": "^3.665.0",
+		"sst": "^3.1.64"
+	}
 }

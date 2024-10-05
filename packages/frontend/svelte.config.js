@@ -1,4 +1,4 @@
-import adapter from "svelte-kit-sst";
+import adapter from 'svelte-kit-sst';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -11,9 +11,9 @@ const config = {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter(),
 		alias: {
-		"@/*": "./src/lib/*",
-		},
-	},
+			'@/*': './src/lib/*'
+		}
+	}
 };
 
 export default config;
