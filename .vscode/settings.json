@@ -2,7 +2,6 @@
 	"bun.runtime": "${env:HOME}/.bun/bin/bun",
 	"bun.debugTerminal.enabled": true,
 	"bun.debugTerminal.stopOnEntry": false,
-	"css.customData": [".vscode/tailwind.json"],
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.formatOnSave": true,
 	"[html]": {
@@ -15,8 +14,8 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"[svelte]": {
-		// "editor.defaultFormatter": "svelte.svelte-vscode",
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.defaultFormatter": "svelte.svelte-vscode",
+		// "editor.defaultFormatter": "esbenp.prettier-vscode",
 		"editor.formatOnSave": true
 	},
 	"typescript.tsdk": "node_modules/typescript/lib"

@@ -13,10 +13,12 @@ export default $config({
 		console.log($app.stage);
 		const api = await import('./infra/api');
 		const frontend = await import('./infra/frontend');
-		const stream = await import('./infra/kinesis');
+		// const stream = await import('./infra/kinesis');
+		const rtServer = await import('./infra/realtime');
 		return {
 			app: frontend.site.url,
-			stream: stream.stream.name
+			rtEndPoint: rtServer.rtServer.endpoint,
+			rtAuthorizer: rtServer.rtServer.authorizer
 		};
 	}
 });
