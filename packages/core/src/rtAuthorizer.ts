@@ -12,7 +12,6 @@ export const handler = realtime.authorizer(async (token) => {
 				subscribe: [`${prefix}/*`]
 			}
 		: {
-				publish: [],
-				subscribe: []
+				publish: []
 			};
 });

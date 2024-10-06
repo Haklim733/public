@@ -1,0 +1,74 @@
+<script context="module">
+	export async function load({ fetch }) {
+		const response = await fetch('ws://localhost:1883');
+		const client = await response.json();
+		return {
+			props: {
+				client
+			}
+		};
+	}
+</script>
+
+<script lang="ts">
+	import mqtt from 'mqtt';
+	import { Resource } from 'sst';
+</script>
+
+<div>
+	<button on:click={connect}>Connect to MQTT</button>
+	<button on:click={disconnect}>Disconnect from MQTT</button>
+</div>
+
+<style>
+	.chat {
+		gap: 1rem;
+		width: 30rem;
+		display: flex;
+		padding: 1rem;
+		flex-direction: column;
+		border-radius: var(--border-radius);
+		background-color: rgba(var(--callout-rgb), 0.5);
+		border: 1px solid rgba(var(--callout-border-rgb), 0.3);
+	}
+
+	.messages {
+		padding-bottom: 0.125rem;
+		border-bottom: 1px solid rgba(var(--callout-border-rgb), 0.3);
+	}
+	.messages > div {
+		line-height: 1.1;
+		padding-bottom: 0.625rem;
+	}
+
+	.form {
+		display: flex;
+		gap: 0.625rem;
+	}
+	.form input {
+		flex: 1;
+		font-size: 0.875rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: calc(1rem - var(--border-radius));
+		border: 1px solid rgba(var(--callout-border-rgb), 1);
+	}
+	.form button {
+		font-weight: 500;
+		font-size: 0.875rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: calc(1rem - var(--border-radius));
+		background: linear-gradient(
+			to bottom right,
+			rgba(var(--tile-start-rgb), 1),
+			rgba(var(--tile-end-rgb), 1)
+		);
+		border: 1px solid rgba(var(--callout-border-rgb), 1);
+	}
+	.form button:active:enabled {
+		background: linear-gradient(
+			to top left,
+			rgba(var(--tile-start-rgb), 1),
+			rgba(var(--tile-end-rgb), 1)
+		);
+	}
+</style>

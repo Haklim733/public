@@ -3,27 +3,37 @@ import { generateARVisionData } from '@mockIot/core/src/simulator';
 import { Resource } from 'sst';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
 import type { RequestEvent } from '@sveltejs/kit';
+import mqtt from 'mqtt';
 
-export async function POST({ request, locals }: RequestEvent) {
-	const { num, service } = await request.json();
-	const sessionId = locals.user.sessionId;
+// const kenisisClient = new KinesisClient();
+// const iotClient = new IoTDataPlaneClient();
+let endpoint = Resource.IotServer.endpoint;
+let authorizer = Resource.IotServer.authorizer;
+
+export async function POST({ request }: RequestEvent) {
+	const { num, service, sessionId } = await request.json();
 	console.log(sessionId);
-	console.log(Resource.RT_TOKEN.value);
 
-	const kenisisClient = new KinesisClient();
-	const iotClient = new IoTDataPlaneClient();
 	let topic = '';
+	let client = mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
+		protocolVersion: 5,
+		manualConnect: true,
+		username: '', // Must be empty
+		password: Resource.RT_TOKEN.value,
+		clientId: sessionId
+	});
 
 	for (let i = 0; i <= num; i++) {
 		if (service === 'iot') {
 			topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;
 			const payload = generateARVisionData(`mockIot-${i}`);
-			await iotClient.send(
-				new PublishCommand({
-					payload: Buffer.from(JSON.stringify(payload)),
-					topic: topic
-				})
-			);
+			client!.publish(topic, JSON.stringify(payload));
+			// await iotClient.send(
+			// 	new PublishCommand({
+			// 		payload: Buffer.from(JSON.stringify(payload)),
+			// 		topic: topic
+			// 	})
+			// );
 		} else if (service === 'kinesis') {
 			let iotData: string = btoa(JSON.stringify(generateARVisionData(`device${i}`)));
 			let buffer = Buffer.from(iotData, 'base64');
@@ -33,7 +43,7 @@ export async function POST({ request, locals }: RequestEvent) {
 				Data: new Uint8Array(buffer),
 				PartitionKey: topic
 			});
-			await kenisisClient
+			await kenesisClient
 				.send(input)
 				.then((data) => {})
 				.catch((error) => {
@@ -45,7 +55,7 @@ export async function POST({ request, locals }: RequestEvent) {
 		}
 	}
 
-	return new Response(JSON.stringify({ topic: topic }), {
+	return new Response(JSON.stringify({ message: 'success' }), {
 		status: 200,
 		headers: {
 			'Content-Type': 'application/json'

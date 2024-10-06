@@ -10,13 +10,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (!sessionId) {
 		let fullSessionId = uuidv4();
-		const sessionId = crypto.createHash('sha256').update(fullSessionId).digest('hex').slice(0, 16);
+		sessionId = crypto.createHash('sha256').update(fullSessionId).digest('hex').slice(0, 16);
+		console.log(sessionId);
 		const myOptions = {
-			maxAge: 60 * 60 * 1 * 1, //60 sec * 60 minutes * 1 hour * 1 day
+			maxAge: 60 * 60 * 1 * 1,
 			httpOnly: true,
 			sameSite: 'lax',
-			secure: true,
-			domain: STAGE === 'dev' ? 'localhost:5173' : import.meta.env.VITE_DOMAIN,
+			secure: false,
+			domain: ['dev', 'llee'].includes(STAGE) ? 'localhost' : import.meta.env.VITE_DOMAIN,
 			path: '/'
 		};
 		// @ts-ignore
