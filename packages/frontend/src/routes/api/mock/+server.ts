@@ -5,14 +5,14 @@ import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-pla
 import type { RequestEvent } from '@sveltejs/kit';
 import mqtt from 'mqtt';
 
-// const kenisisClient = new KinesisClient();
-// const iotClient = new IoTDataPlaneClient();
 let endpoint = Resource.IotServer.endpoint;
 let authorizer = Resource.IotServer.authorizer;
 
+const iotClient = new IoTDataPlaneClient({});
+
 export async function POST({ request }: RequestEvent) {
 	const { num, service, sessionId } = await request.json();
-	console.log(sessionId);
+	console.log(endpoint);
 
 	let topic = '';
 	let client = mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
@@ -28,12 +28,13 @@ export async function POST({ request }: RequestEvent) {
 			topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;
 			const payload = generateARVisionData(`mockIot-${i}`);
 			client!.publish(topic, JSON.stringify(payload));
-			// await iotClient.send(
-			// 	new PublishCommand({
-			// 		payload: Buffer.from(JSON.stringify(payload)),
-			// 		topic: topic
-			// 	})
-			// );
+			let res = await iotClient.send(
+				new PublishCommand({
+					payload: Buffer.from(JSON.stringify(payload)),
+					topic: topic
+				})
+			);
+			console.log(await res);
 		} else if (service === 'kinesis') {
 			let iotData: string = btoa(JSON.stringify(generateARVisionData(`device${i}`)));
 			let buffer = Buffer.from(iotData, 'base64');

@@ -12,7 +12,12 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 	},
 	link: [stream, rtServer, rtToken],
 	path: 'packages/frontend',
-	permissions: [],
+	permissions: [
+		{
+			actions: ['iot:Publish', 'iot:Subscribe'],
+			resources: ['*']
+		}
+	],
 	server: {
 		memory: '512 MB'
 	}
