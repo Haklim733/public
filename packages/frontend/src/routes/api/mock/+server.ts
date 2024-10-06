@@ -5,29 +5,20 @@ import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-pla
 import type { RequestEvent } from '@sveltejs/kit';
 import mqtt from 'mqtt';
 
-let endpoint = Resource.IotServer.endpoint;
-let authorizer = Resource.IotServer.authorizer;
-
 const iotClient = new IoTDataPlaneClient({});
 
 export async function POST({ request }: RequestEvent) {
-	const { num, service, sessionId } = await request.json();
-	console.log(endpoint);
+	const { devices, sessionId, service } = await request.json();
 
 	let topic = '';
-	let client = mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
-		protocolVersion: 5,
-		manualConnect: true,
-		username: '', // Must be empty
-		password: Resource.RT_TOKEN.value,
-		clientId: sessionId
-	});
+	console.log(`smock/+server.ts: ${devices}, ${service}, ${sessionId}`);
 
-	for (let i = 0; i <= num; i++) {
+	for (let i = 0; i <= devices; i++) {
 		if (service === 'iot') {
 			topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;
+			console.log(topic);
 			const payload = generateARVisionData(`mockIot-${i}`);
-			client!.publish(topic, JSON.stringify(payload));
+			// client!.publish(topic, JSON.stringify(payload));
 			let res = await iotClient.send(
 				new PublishCommand({
 					payload: Buffer.from(JSON.stringify(payload)),

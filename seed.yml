@@ -1,0 +1,37 @@
+before_compile:
+  - echo "Before compile"
+
+compile:
+  - echo "compile"
+  - curl -fsSL https://bun.sh/install | bash
+  - echo 'export PATH="$HOME/.bun/bin/:$PATH"' >> $BASH_ENV
+  - bun install
+
+before_build:
+  - echo "Before build"
+  - echo $SEED_STAGE_BRANCH
+  - echo $SEED_STAGE_NAME
+  - bun sst build --stage $SEED_STAGE_NAME --verbose --region us-west-1 --to .sst/cdk.out
+
+before_deploy:
+  - echo "Before deploy"
+  - echo $SEED_STAGE_BRANCH
+  - echo $SEED_STAGE_NAME
+
+after_deploy:
+  - echo $SEED_STAGE_BRANCH
+  - echo $SEED_STAGE_NAME
+  - bun sst build
+
+before_remove:
+  - echo "Before remove"
+  - echo $SEED_STAGE_BRANCH
+  - echo $SEED_STAGE_NAME
+
+after_remove:
+  - echo "After remove"
+  - echo $SEED_STAGE_BRANCH
+  - echo $SEED_STAGE_NAME
+
+ignore_paths:
+  - README.md
