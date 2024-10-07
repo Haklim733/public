@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { DeviceData, generateARVisionData, randomSleep, timeout } from './simulator';
+import { DeviceData, generateARVisionData, randomSleep, timeout } from './ar';
 
 const s3Client = new S3Client({ region: 'us-west-1' });
 

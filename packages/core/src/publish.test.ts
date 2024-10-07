@@ -1,4 +1,4 @@
-import { generateARVisionData } from '@mockIot/core/src/simulator';
+import { generateARVisionData } from '@mockIot/core/src/ar';
 import { Resource } from 'sst';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
 import mqtt from 'mqtt';

@@ -5,13 +5,14 @@
 	import mqtt from 'mqtt';
 	import { msg } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
+	import { applyAction } from '$app/forms';
 
 	export let data: PageData;
 	const { form, enhance } = superForm(data.form, {
 		applyAction: true,
 		invalidateAll: false,
 		resetForm: false,
-		multipleSubmits: 'allow',
+		multipleSubmits: data.stage === 'prod' ? 'prevent' : 'allow',
 		onSubmit: ({ formData, cancel }) => {
 			formData.set('sessionId', data.sessionId);
 			formData.set('devices', $form.devices);
@@ -65,7 +66,7 @@
 		client.on('close', () => {
 			console.log('Disconnected from MQTT broker');
 		});
-		client.connect();
+		// client.connect();
 		// }
 		// function disconnectToMqtt() {
 		// 	client.end();
@@ -85,30 +86,24 @@
 	}
 </script>
 
-<div class="App">
-	<div class="flex">
+<div class="App" style="display: flex; height: 100vh; width: 100vw;">
+	<div class="left-container" style="flex: 1; padding: 20px;">
 		<SuperDebug data={$form} />
 		<form method="POST" use:enhance>
 			<p>See Iot Graph</p>
-			<div class="box" style={`width: 10px`}>
-				<label for="devices">Number:</label>
-				<input type="number" id="devices" min="1" max="5" bind:value={$form.devices} />
-			</div>
+			<label for="devices">Number of devices (max 5):</label>
+			<input type="number" id="devices" min="1" max="5" bind:value={$form.devices} />
 			<div>
-				<button class="btn">Click to simulate iot Data feed!</button>
+				<button class="btn">Click to simulate iot telemetry!</button>
 			</div>
 		</form>
-		<!-- <div class="box" style={`width: 10px`}>
-			<label for="connect">Connect:</label>
-			<!-- <button class="btn" on:click={connectToMqtt()}></button> -->
-		<!-- </div> --> -->
 	</div>
-	<div>
+	<div class="right-container" style="flex: 1; padding: 20px; overflow-y: auto;">
 		<h2>Streamed Data</h2>
 		{$msg}
-	</div>
-	<div>
-		{messages}
+		<div>
+			{messages}
+		</div>
 	</div>
 </div>
 
@@ -120,8 +115,8 @@
 		place-items: center;
 	}
 	.box {
-		width: 200px;
-		height: 200px;
+		width: 100px;
+		height: 100px;
 		background-color: lightgray;
 		display: flex;
 		justify-content: center;

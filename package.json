@@ -11,9 +11,9 @@
 		"lint": "lint",
 		"compile": "bun run -T tsc --build --verbose",
 		"format": "prettier --write .",
-		"tc:root": "vitest --typecheck --exclude '**/{test,integ}.*' --run",
+		"tc:root": "bun --typecheck --exclude '**/{test,integ}.*' --run",
 		"tc:frontend": "bun workspace frontend check",
-		"test": "vitest",
+		"test": "test",
 		"typecheck": "bun tc:root && bun tc:frontend"
 	},
 	"devDependencies": {

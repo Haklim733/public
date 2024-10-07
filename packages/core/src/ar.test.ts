@@ -1,8 +1,8 @@
-import { describe, it } from 'vitest';
-import { generateARVisionData, generateUniqueToken } from './simulator';
+import { generateARVisionData, generateUniqueToken } from './ar';
+import { expect, describe, test } from 'bun:test';
 
 describe('generateARVisionData', () => {
-	it('should output all telemetry needed', async () => {
+	test('should output all telemetry needed', async () => {
 		let data = await generateARVisionData('testDeivceId');
 		let b64Str = btoa(JSON.stringify(data));
 		// const buffer = Buffer.from(b64Str, 'base64');
@@ -14,7 +14,7 @@ describe('generateARVisionData', () => {
 });
 
 describe('generateToken', () => {
-	it('test', async () => {
+	test('test', async () => {
 		const uniqueToken = generateUniqueToken();
 		console.log(uniqueToken);
 	});

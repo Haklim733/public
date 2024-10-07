@@ -1,5 +1,5 @@
 import { KinesisClient, PutRecordCommand } from '@aws-sdk/client-kinesis';
-import { generateARVisionData } from '@mockIot/core/src/simulator';
+import { generateDroneTelemetryData } from '@mockIot/core/src/drone';
 import { Resource } from 'sst';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
 import type { RequestEvent } from '@sveltejs/kit';
@@ -16,7 +16,7 @@ export async function POST({ request }: RequestEvent) {
 		if (service === 'iot') {
 			topic = `${Resource.App.name}/${Resource.App.stage}/iot/test`;
 			console.log(topic);
-			const payload = generateARVisionData(`mockIot-${i}`);
+			const payload = generateDroneTelemetryData(`mockIot-${i}`);
 			// client!.publish(topic, JSON.stringify(payload));
 			let res = await iotClient.send(
 				new PublishCommand({
