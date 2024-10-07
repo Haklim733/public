@@ -1,74 +1,68 @@
-<script context="module">
-	export async function load({ fetch }) {
-		const response = await fetch('ws://localhost:1883');
-		const client = await response.json();
-		return {
-			props: {
-				client
-			}
-		};
-	}
-</script>
+"use client";
 
-<script lang="ts">
-	import mqtt from 'mqtt';
-	import { Resource } from 'sst';
-</script>
+import mqtt from "mqtt";
+import { useState, useEffect } from "react";
+import styles from "./chat.module.css";
 
-<div>
-	<button on:click={connect}>Connect to MQTT</button>
-	<button on:click={disconnect}>Disconnect from MQTT</button>
-</div>
+export default function Chat(
+  { topic, endpoint, authorizer }: { topic: string, endpoint: string, authorizer: string }
+) {
+  const [messages, setMessages] = useState<string[]>([]);
+  const [connection, setConnection] = useState<mqtt.MqttClient | null>(null);
 
-<style>
-	.chat {
-		gap: 1rem;
-		width: 30rem;
-		display: flex;
-		padding: 1rem;
-		flex-direction: column;
-		border-radius: var(--border-radius);
-		background-color: rgba(var(--callout-rgb), 0.5);
-		border: 1px solid rgba(var(--callout-border-rgb), 0.3);
-	}
+  return (
+    <div className={styles.chat}>
+      {connection && messages.length > 0 &&
+        <div className={styles.messages}>
+          {messages.map((msg, i) => (
+            <div key={i}>{msg}</div>
+          ))}
+        </div>
+      }
+      <form
+        className={styles.form}
+        onSubmit={async (e) => {
+          e.preventDefault();
 
-	.messages {
-		padding-bottom: 0.125rem;
-		border-bottom: 1px solid rgba(var(--callout-border-rgb), 0.3);
-	}
-	.messages > div {
-		line-height: 1.1;
-		padding-bottom: 0.625rem;
-	}
+          const input = (e.target as HTMLFormElement).message;
 
-	.form {
-		display: flex;
-		gap: 0.625rem;
-	}
-	.form input {
-		flex: 1;
-		font-size: 0.875rem;
-		padding: 0.5rem 0.75rem;
-		border-radius: calc(1rem - var(--border-radius));
-		border: 1px solid rgba(var(--callout-border-rgb), 1);
-	}
-	.form button {
-		font-weight: 500;
-		font-size: 0.875rem;
-		padding: 0.5rem 0.75rem;
-		border-radius: calc(1rem - var(--border-radius));
-		background: linear-gradient(
-			to bottom right,
-			rgba(var(--tile-start-rgb), 1),
-			rgba(var(--tile-end-rgb), 1)
-		);
-		border: 1px solid rgba(var(--callout-border-rgb), 1);
-	}
-	.form button:active:enabled {
-		background: linear-gradient(
-			to top left,
-			rgba(var(--tile-start-rgb), 1),
-			rgba(var(--tile-end-rgb), 1)
-		);
-	}
-</style>
+          connection!.publish(topic, input.value, { qos: 1 });
+          input.value = "";
+        }}
+      >
+        <input
+          required
+          autoFocus
+          type="text"
+          name="message"
+          placeholder={
+            connection ? "Ready! Say hello..." : "Connecting..."
+          }
+        />
+        <button type="submit" disabled={connection === null}>Send</button>
+      </form>
+    </div>
+  );
+}
+useEffect(() => {
+  const connection = createConnection(endpoint, authorizer);
+
+  connection.on("connect", async () => {
+    try {
+      await connection.subscribeAsync(topic, { qos: 1 });
+      setConnection(connection);
+    } catch (e) { }
+  });
+  connection.on("message", (_fullTopic, payload) => {
+    const message = new TextDecoder("utf8").decode(new Uint8Array(payload));
+    setMessages((prev) => [...prev, message]);
+  });
+  connection.on("error", console.error);
+
+  connection.connect();
+
+  return () => {
+    connection.end();
+    setConnection(null);
+  };
+}, [topic, endpoint, authorizer]);

@@ -1,6 +1,16 @@
 import { stream } from './kinesis';
 import { rtServer, rtToken } from './realtime';
 
+let domain = 'localhost';
+let url = 'http://localhost:5173';
+if ($app.stage === 'prod') {
+	domain = 'iamlim.com';
+}
+if ($app.stage === 'dev') {
+	domain = 'dev.iamlim.com';
+}
+url = `https://${domain}`;
+
 export const site = new sst.aws.SvelteKit('MockIotSite', {
 	dev: {
 		autostart: true
@@ -8,7 +18,7 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 	buildCommand: 'bun run build',
 	environment: {
 		VITE_STAGE: $app.stage,
-		VITE_DOMAIN: $app.stage === 'prod' ? 'iot.iamlim.com' : 'iot.dev.iamlim.com'
+		VITE_DOMAIN: domain
 	},
 	link: [stream, rtServer, rtToken],
 	path: 'packages/frontend',
@@ -19,6 +29,66 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 		}
 	],
 	server: {
-		memory: '512 MB'
+		memory: '256 MB'
 	}
 });
+
+// if (!$dev) {
+// 	const router = new sst.aws.Router('MyRouter', {
+// 		domain: {
+// 			dns: sst.aws.dns({
+// 				zone: $app.stage === 'prod' ? 'Z0140882217FY9MCT4KM1' : 'Z1048110TMWW9X3WITD5'
+// 			}),
+// 			name: domain
+// 		},
+// 		routes: {
+// 			'/projects/iot*': site.nodes.server.url
+// 		}
+// 	});
+// }
+// const exposeHeaders = [
+// 	'Date',
+// 	'Keep-Alive',
+// 	'X-Custom-Header',
+// 	'X-Amz-Request-Id',
+// 	'Content-Type',
+// 	'Content-Length',
+// 	'Access-Control-Allow-Origin'
+// ];
+// const allowHeaders = [
+// 	'Content-Type',
+// 	'Origin',
+// 	'Expires',
+// 	'Accept',
+// 	'X-Requested-With',
+// 	'Cache-Control',
+// 	'Access-Control-Allow-Origin'
+// ];
+
+// export const apiFunction = new sst.aws.Function('MyApiFunction', {
+// 	handler: 'packages/core/src/api.handler',
+// 	url: {
+// 		cors: {
+// 			allowMethods: ['GET', 'HEAD'],
+// 			allowOrigins: [url],
+// 			exposeHeaders: exposeHeaders,
+// 			allowHeaders: allowHeaders
+// 		}
+// 	},
+// 	link: [],
+// 	permissions: [
+// 		{
+// 			actions: [
+// 				's3:GetObject',
+// 				's3:PutObject',
+// 				's3:DeleteObject',
+// 				's3:ListBucket',
+// 				's3:List*',
+// 				'iot:Publish',
+// 				'iot:Subscribe'
+// 			],
+// 			resources: ['*']
+// 		}
+// 	],
+// 	runtime: 'nodejs20.x'
+// });

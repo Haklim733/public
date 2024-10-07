@@ -1,7 +1,6 @@
 export const stream = new sst.aws.KinesisStream('mockIotStream');
 
-// Create a function subscribing to events of `bar` type
-stream.subscribe('subscriber.ar', {
+stream.subscribe('./packages/core/src/subscriber.filtered', {
 	filters: [
 		{
 			data: {
@@ -12,7 +11,7 @@ stream.subscribe('subscriber.ar', {
 });
 
 export const apiFunction = new sst.aws.Function('ConsumerFunction', {
-	handler: 'packages/functions/src/api.handler',
+	handler: 'packages/core/src/api.handler',
 	link: [stream],
 	permissions: [
 		{

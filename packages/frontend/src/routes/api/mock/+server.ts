@@ -3,7 +3,6 @@ import { generateARVisionData } from '@mockIot/core/src/simulator';
 import { Resource } from 'sst';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
 import type { RequestEvent } from '@sveltejs/kit';
-import mqtt from 'mqtt';
 
 const iotClient = new IoTDataPlaneClient({});
 
@@ -15,7 +14,7 @@ export async function POST({ request }: RequestEvent) {
 
 	for (let i = 0; i <= devices; i++) {
 		if (service === 'iot') {
-			topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;
+			topic = `${Resource.App.name}/${Resource.App.stage}/iot/test`;
 			console.log(topic);
 			const payload = generateARVisionData(`mockIot-${i}`);
 			// client!.publish(topic, JSON.stringify(payload));

@@ -3,7 +3,6 @@
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
 	import mqtt from 'mqtt';
-	import { writable } from 'svelte/store';
 	import { msg } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 
@@ -23,7 +22,9 @@
 
 	function createConnection(endpoint: string, authorizer: string) {
 		console.log(endpoint, authorizer);
-		return mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
+		let url = `wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`;
+
+		return mqtt.connect(url, {
 			protocolVersion: 5,
 			manualConnect: true,
 			username: '', // Must be empty
@@ -35,35 +36,41 @@
 	// const client = writable<any | null>(null);
 	let messages = [];
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
+	topic = `${data.appName}/${data.stage}/iot/test`;
 	console.log(topic);
 
-	// if (browser) {
-	// 	const client = createConnection(data.endpoint, data.authorizer);
-	// 	client.on('connect', async () => {
-	// 		client.subscribe(`${topic}`, { qos: 2 }, (error) => {
-	// 			if (error) {
-	// 				console.error('Error subscribing to topic:', error);
-	// 			} else {
-	// 				console.log('Subscribed to topic: my/topic');
-	// 			}
-	// 		});
-	// 	});
-	// 	client.on('message', (topic, message) => {
-	// 		console.log(message.toString());
-	// 		messages = [...messages, `Topic: ${topic}, Message: ${$msg}`];
-	// 	});
-	// 	client.on('error', (error) => {
-	// 		console.error('Error connecting to MQTT broker:', error);
-	// 	});
-
-	// 	client.publish(topic, 'Hello world!', { qos: 2 });
-	// 	client.on('offline', () => {
-	// 		console.log('Offline from MQTT broker');
-	// 	});
-	// 	client.on('close', () => {
-	// 		console.log('Disconnected from MQTT broker');
-	// 	});
-	// }
+	if (browser) {
+		const client = createConnection(data.endpoint, data.authorizer);
+		console.log(client.connected);
+		client.on('connect', async () => {
+			try {
+				await client.subscribeAsync(topic, { qos: 1 });
+				client.connect();
+				console.log('connected');
+			} catch (e) {
+				console.log(e);
+			}
+		});
+		client.on('message', (_fullTopic, payload) => {
+			$msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
+			console.log($msg);
+			messages = [...messages, `Topic: ${topic}, Message: ${$msg}`];
+		});
+		client.on('error', (error) => {
+			console.error('Error connecting to MQTT broker:', error);
+		});
+		client.on('offline', () => {
+			console.log('Offline from MQTT broker');
+		});
+		client.on('close', () => {
+			console.log('Disconnected from MQTT broker');
+		});
+		client.connect();
+		// }
+		// function disconnectToMqtt() {
+		// 	client.end();
+		// }
+	}
 	// streamIot.js
 	export async function streamIot(props) {
 		const res = await fetch('/api/mock', {
@@ -91,6 +98,10 @@
 				<button class="btn">Click to simulate iot Data feed!</button>
 			</div>
 		</form>
+		<!-- <div class="box" style={`width: 10px`}>
+			<label for="connect">Connect:</label>
+			<!-- <button class="btn" on:click={connectToMqtt()}></button> -->
+		<!-- </div> --> -->
 	</div>
 	<div>
 		<h2>Streamed Data</h2>

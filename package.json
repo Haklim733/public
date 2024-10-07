@@ -8,8 +8,6 @@
 	},
 	"scripts": {
 		"dev": "sst dev",
-		"build": "sst build",
-		"start": "sst start",
 		"lint": "lint",
 		"compile": "bun run -T tsc --build --verbose",
 		"format": "prettier --write .",
@@ -22,8 +20,7 @@
 		"@types/aws-lambda": "^8.10.130",
 		"@types/bun": "^1.1.10",
 		"dotenv": "^16.3.1",
-		"typescript": "^5.3.3",
-		"vitest": "^1.1.1"
+		"typescript": "^5.3.3"
 	},
 	"workspaces": [
 		"packages/*"
@@ -32,6 +29,6 @@
 		"@aws-sdk/client-iot-data-plane": "^3.665.0",
 		"@aws-sdk/client-kinesis": "^3.665.0",
 		"mqtt": "^5.10.1",
-		"sst": "^3.1.64"
+		"sst": "3.1.63"
 	}
 }

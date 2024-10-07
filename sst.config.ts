@@ -11,10 +11,8 @@ export default $config({
 	},
 	async run() {
 		console.log($app.stage);
-		const api = await import('./infra/api');
-		const frontend = await import('./infra/frontend');
-		// const stream = await import('./infra/kinesis');
 		const rtServer = await import('./infra/realtime');
+		const frontend = await import('./infra/frontend');
 		return {
 			app: frontend.site.url,
 			rtEndPoint: rtServer.rtServer.endpoint,
