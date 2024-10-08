@@ -7,6 +7,9 @@
 	import Map from '$lib/components/Map.svelte';
 	import MqttConnection from '$lib/connect';
 	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
+	import { Button } from '$lib/components/ui/button/index';
+	import { Input } from '$lib/components/ui/input/index';
+	import { Label } from '$lib/components/ui/label/index';
 
 	export let data: PageData;
 
@@ -94,36 +97,32 @@
 		<h1>Test Iot Telemetry</h1>
 		<SuperDebug data={$form} />
 		<form method="POST" use:enhance>
-			<label>
-				<label for="duration">Duration (0-60 seconds):</label>
-				<input
-					class="input-box"
-					type="number"
-					min="0"
-					max="60"
-					name="duration"
-					id="duration"
-					bind:value={$form.duration}
-				/>
-			</label>
-			<label>
-				<label for="speed">Speed (m/s):</label>
-				<input
-					class="input-box"
-					type="number"
-					min="1"
-					max="100"
-					name="speed"
-					id="speed"
-					bind:value={$form.speed}
-				/>
-			</label>
+			<Label for="duration">Duration (0-60 seconds):</Label>
+			<Input
+				class="input-box"
+				type="number"
+				min="0"
+				max="60"
+				name="duration"
+				id="duration"
+				bind:value={$form.duration}
+			/>
+			<Label for="speed">Speed (m/s):</Label>
+			<Input
+				class="input-box"
+				type="number"
+				min="1"
+				max="100"
+				name="speed"
+				id="speed"
+				bind:value={$form.speed}
+			/>
 			<div>
-				<button class="btn">Click to simulate drone telemetry!</button>
+				<Button class="btn">Click to simulate drone telemetry!</Button>
 			</div>
 		</form>
 		<div>
-			<button
+			<Button
 				class="btn"
 				name="clear"
 				id="clear"
@@ -133,7 +132,7 @@
 				}}
 			>
 				Clear telemetry!
-			</button>
+			</Button>
 		</div>
 	</div>
 	<div class="left-bottom-container">
@@ -157,9 +156,6 @@
 		place-items: center;
 		grid-template-columns: 1fr 1fr;
 		grid-template-rows: auto 1fr;
-	}
-	button {
-		font-size: 21px;
 	}
 	.input-box {
 		display: block;
