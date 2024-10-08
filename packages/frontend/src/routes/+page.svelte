@@ -5,6 +5,7 @@
 	import mqtt from 'mqtt';
 	import { msg } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
+	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
 	// import { DroneTelemetryData } from '@mockiot/core/src/drone';
 
@@ -40,6 +41,7 @@
 
 	// const client = writable<any | null>(null);
 	let messages = [];
+	let lineFeatures = [];
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 	// topic = `${data.appName}/${data.stage}/iot/test`;
 
@@ -99,7 +101,7 @@
 	</div>
 	<div class="right-container" style="flex: 1; padding: 20px 20px 0 20px; overflow-y: auto;">
 		<div class="map-container" style="width: 100%; height: 300px; border: 1px solid black;">
-			<div id="map" style="width: 100%; height: 100%;"></div>
+			<Map {messages} />
 		</div>
 		<h2>Streamed Data</h2>
 		<div class="message-container" style="max-height: 200px; overflow-y: auto;">
