@@ -10,26 +10,28 @@
 	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
-	import { Label } from '$lib/components/ui/label/index';
+	import * as Form from '$lib/components/ui/form';
 
 	export let data: PageData;
-
-	const { form, enhance } = superForm(data.form, {
+	const form = superForm(data.form, {
 		applyAction: true,
 		invalidateAll: false,
 		resetForm: false,
 		multipleSubmits: data.stage === 'prod' ? 'prevent' : 'allow',
 		onSubmit: ({ formData, cancel }) => {
+			console.log(formData);
 			console.log('submit');
 			streamIot({
-				duration: $form.duration,
-				speed: $form.speed,
+				duration: formData.get('duration'),
+				speed: formData.get('speed'),
 				sessionId: data.sessionId,
 				service: 'drone'
 			});
 			cancel();
 		}
 	});
+
+	const { form: formData, enhance } = form;
 
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 
@@ -96,22 +98,25 @@
 <div class="App">
 	<div class="left-top-container">
 		<h1>Test Iot Telemetry</h1>
-		<SuperDebug data={$form} />
+		<SuperDebug data={$formData} />
 		<form method="POST" use:enhance>
-			<Label for="duration">Duration (0-60 seconds):</Label>
-			<Input
-				type="number"
-				min="0"
-				max="60"
-				name="duration"
-				id="duration"
-				bind:value={$form.duration}
-			/>
-			<Label for="speed">Speed (m/s):</Label>
-			<Input type="number" min="1" max="100" name="speed" id="speed" bind:value={$form.speed} />
-			<div>
-				<Button class="btn">Click to simulate drone telemetry!</Button>
-			</div>
+			<Form.Field {form} name="duration">
+				<Form.Control let:attrs>
+					<Form.Label>Duration</Form.Label>
+					<Input {...attrs} bind:value={$formData.duration} />
+				</Form.Control>
+				<Form.Description>This is the duration of the flight (seconds).</Form.Description>
+				<Form.FieldErrors />
+			</Form.Field>
+			<Form.Field {form} name="speed">
+				<Form.Control let:attrs>
+					<Form.Label>Speed</Form.Label>
+					<Input {...attrs} bind:value={$formData.speed} />
+				</Form.Control>
+				<Form.Description>This is the speed of the drone (m/s)</Form.Description>
+				<Form.FieldErrors />
+			</Form.Field>
+			<Form.Button>Submit</Form.Button>
 		</form>
 		<div>
 			<Button
@@ -179,9 +184,8 @@
 		grid-column: 2;
 		grid-row: 2;
 		padding: 20px;
-		height: 100%;
-		width: 100%;
 	}
+
 	.message {
 		display: block;
 		overflow-wrap: break-word;
