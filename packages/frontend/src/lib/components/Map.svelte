@@ -20,9 +20,9 @@
 		'EPSG:3857'
 	);
 	let center = startLocation;
-	let radius = 10000; // 10k in meters
+	let radius = 1000; // 10k in meters
 	let startFeature = new Feature(new Point(startLocation));
-	export let messages: DroneTelemetryData[] = [];
+	// export let messages: DroneTelemetryData[] = [];
 
 	startFeature.setStyle(
 		new Style({
@@ -70,11 +70,11 @@
 	});
 
 	$: {
-		// if (messages.length > 1) {
 		test.subscribe((newMessages) => {
-			vectorSource.clear();
-			messages.forEach((message) => {
-				const point = transform([message.longitude, message.latitude], 'EPSG:4326', 'EPSG:3857');
+			const latest = newMessages[newMessages.length - 1];
+			if (latest) {
+				console.log(latest.longitude, latest.latitude);
+				const point = transform([latest.longitude, latest.latitude], 'EPSG:4326', 'EPSG:3857');
 				const pointFeature = new Feature(new Point(point));
 
 				const circleStyle = new Style({
@@ -87,9 +87,9 @@
 				});
 
 				pointFeature.setStyle(circleStyle);
-				vectorSource.addFeature(startFeature);
 				vectorSource.addFeature(pointFeature);
-			});
+				vectorSource.changed();
+			}
 		});
 	}
 </script>

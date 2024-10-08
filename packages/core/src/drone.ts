@@ -73,9 +73,9 @@ export async function generateDroneTelemetryData(
 		}
 
 		currentLocation = updateLocation(currentLocation, velocityX, velocityY, speed);
-		timestamp += 1000;
-
-		await new Promise((resolve) => setTimeout(resolve, 2000)); // wait for 2 second
+		const randomTime = Math.random() * 1000;
+		timestamp += randomTime;
+		await new Promise((resolve) => setTimeout(resolve, randomTime)); // wait for between 1 and 2 seconds
 	}
 }
 

@@ -25,7 +25,7 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 	path: 'packages/frontend',
 	permissions: [
 		{
-			actions: ['iot:Publish', 'iot:Subscribe'],
+			actions: ['iot:Publish', 'iot:Subscribe', 'iot:Connect', 'iot:Receive'],
 			resources: ['*']
 		}
 	],

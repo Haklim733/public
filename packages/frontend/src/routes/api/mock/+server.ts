@@ -13,7 +13,7 @@ export async function POST({ request }: RequestEvent) {
 	if (service === 'drone') {
 		const startLocation = { latitude: 34.1186197, longitude: -118.30813539, altitude: 346 };
 		const endLocation = { latitude: 34.16242, longitude: -118.16787, altitude: 20 };
-		const speed = 20; //meter per second
+		const speed = 1000; //meter per second
 		const altitude = 15;
 		const device = 'mockIot';
 		topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;

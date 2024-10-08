@@ -6,7 +6,7 @@
 	import { test } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
-	import { onMount } from 'svelte';
+	import MqttConnection from '$lib/connect';
 	// import { DroneTelemetryData } from '@mockiot/core/src/drone';
 
 	export let data: PageData;
@@ -27,30 +27,16 @@
 		}
 	});
 
-	function createConnection(endpoint: string, authorizer: string) {
-		let url = `wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`;
-
-		return mqtt.connect(url, {
-			protocolVersion: 5,
-			manualConnect: true,
-			username: '', // Must be empty
-			password: data.token,
-			clientId: data.sessionId,
-			clean: false
-		});
-	}
-
-	// const client = writable<any | null>(null);
-	let lineFeatures = [];
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
-	// topic = `${data.appName}/${data.stage}/iot/test`;
 
 	if (browser) {
-		const client = createConnection(data.endpoint, data.authorizer);
-		client.on('connect', async () => {
+		// const client = createConnection(data.endpoint, data.authorizer);
+		const mqttConnection = MqttConnection.getInstance();
+		mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
+		const client = mqttConnection.getClient();
+		client.on('connect', () => {
 			try {
-				await client.subscribeAsync(topic, { qos: 1 });
-				client.connect();
+				client.subscribe(topic, { qos: 1 });
 				console.log('connected to MQTT');
 			} catch (e) {
 				console.log(e);
@@ -75,11 +61,12 @@
 			console.log('Disconnected from MQTT broker');
 		});
 		client.connect();
-		// }
-		// function disconnectToMqtt() {
-		// 	client.end();
-		// }
+
+		window.addEventListener('beforeunload', () => {
+			mqttConnection.disconnect();
+		});
 	}
+
 	// streamIot.js
 	export async function streamIot(props) {
 		const res = await fetch('/api/mock', {
@@ -96,9 +83,9 @@
 
 <div class="App" style="display: flex; height: 100vh; width: 100vw;">
 	<div class="left-container" style="flex: 1; padding: 20px;">
+		<h1>Test Iot Telemetry</h1>
 		<SuperDebug data={$form} />
 		<form method="POST" use:enhance>
-			<p>Test Iot Telemetry</p>
 			<label>
 				<label for="duration">Duration (0-60 seconds):</label>
 				<input
@@ -137,7 +124,7 @@
 	</div>
 	<div class="right-container" style="flex: 1; padding: 20px 20px 0 20px; overflow-y: auto;">
 		<div class="map-container" style="width: 100%; height: 300px; border: 1px solid black;">
-			<Map {messages} />
+			<Map />
 		</div>
 	</div>
 </div>
