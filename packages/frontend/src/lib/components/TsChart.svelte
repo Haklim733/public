@@ -4,19 +4,25 @@
 	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
 
 	let chartData: DroneTelemetryData[] = [];
+	const x = (d: DroneTelemetryData) => d.timestamp;
+	const y = (d: DroneTelemetryData) => d.altitude;
 
 	$: {
 		messages.subscribe((message) => {
 			chartData = message.map((record) => ({
-				x: record.timestamp,
-				y: record.altitude
+				timestamp: record.timestamp,
+				altitude: record.altitude
 			}));
 		});
+		console.log(chartData);
 	}
+	function clearVizData() {
+		chartData = [];
+	}
+
+	export { clearVizData };
 </script>
 
-<VisXYContainer>
-	<VisLine {chartData} x={(d) => d.timestamp} y={(d) => d.altitude} />
-	<VisAxis type="x" />
-	<VisAxis type="y" />
+<VisXYContainer data={chartData}>
+	<VisLine {x} {y} />
 </VisXYContainer>

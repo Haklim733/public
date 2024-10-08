@@ -5,7 +5,7 @@
 	import { messages } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
-	// import TsChart from '$lib/components/TsChart.svelte';
+	import TsChart from '$lib/components/TsChart.svelte';
 	import MqttConnection from '$lib/connect';
 	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
@@ -87,10 +87,16 @@
 	}
 
 	let mapComponent;
+	let vizComponent;
 
 	function clearMap() {
 		if (mapComponent) {
 			mapComponent.clearVectorSource();
+		}
+	}
+	function clearViz() {
+		if (vizComponent) {
+			vizComponent.clearVizData();
 		}
 	}
 </script>
@@ -126,23 +132,25 @@
 				on:click={() => {
 					messages.set([]);
 					clearMap();
+					clearViz();
 				}}
 			>
 				Clear telemetry!
 			</Button>
 		</div>
 	</div>
-	<div class="left-bottom-container">
+	<!-- <div class="left-bottom-container">
 		<h2>Streamed Data</h2>
 		{#each $messages as item}
 			<div class="message">{JSON.stringify(item)}</div>
 		{/each}
-	</div>
+	</div> -->
 	<div class="right-top-container">
 		<Map bind:this={mapComponent}></Map>
 	</div>
-	<div class="right-bottom-container"></div>
-	<!-- <TsChart></TsChart> -->
+	<div class="right-bottom-container">
+		<TsChart bind:this={vizComponent} />
+	</div>
 </div>
 
 <style>
@@ -163,13 +171,14 @@
 		gap: 10px;
 		padding: 20px;
 		overflow-y: auto;
+		height: '80%';
 	}
 	.left-bottom-container {
 		grid-column: 1;
 		grid-row: 2;
 		padding: 20px;
 		overflow-y: scroll;
-		height: 50vh;
+		height: 20%;
 		display: block;
 	}
 	.right-top-container {
@@ -184,6 +193,9 @@
 		grid-column: 2;
 		grid-row: 2;
 		padding: 20px;
+		height: 100%;
+		width: 100%;
+		align-items: center;
 	}
 
 	.message {
