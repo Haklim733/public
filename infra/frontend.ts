@@ -1,4 +1,3 @@
-import { stream } from './kinesis';
 import { rtServer, rtToken } from './realtime';
 
 let domain = 'localhost';
@@ -21,7 +20,7 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 		VITE_STAGE: $app.stage,
 		VITE_DOMAIN: domain
 	},
-	link: [stream, rtServer, rtToken],
+	link: [rtServer, rtToken],
 	path: 'packages/frontend',
 	permissions: [
 		{
@@ -31,15 +30,6 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 	],
 	server: {
 		memory: '256 MB'
-	},
-	transform: {
-		cdn: {
-			transform: {
-				distribution: (args, opts) => {
-					opts.import = '';
-				}
-			}
-		}
 	}
 });
 

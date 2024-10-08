@@ -27,25 +27,6 @@ export async function POST({ request }: RequestEvent) {
 			true,
 			topic
 		);
-	} else if (service === 'kinesis') {
-		// 	let iotData: string = btoa(JSON.stringify(generateARVisionData(`device${i}`)));
-		// 	let buffer = Buffer.from(iotData, 'base64');
-		// 	topic = sessionId;
-		// 	let input = new PutRecordCommand({
-		// 		StreamName: Resource.mockIotStream.name,
-		// 		Data: new Uint8Array(buffer),
-		// 		PartitionKey: topic
-		// 	});
-		// 	await kenesisClient
-		// 		.send(input)
-		// 		.then((data) => {})
-		// 		.catch((error) => {
-		// 			return { message: 'failed!' };
-		// 		})
-		// 		.finally(() => {
-		// 			message = `pushed telemetry to ${Resource.mockIotStream.name} using ;`;
-		// 		});
-		// }
 	}
 
 	return new Response(JSON.stringify({ message: 'success' }), {
