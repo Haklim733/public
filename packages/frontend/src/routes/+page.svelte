@@ -2,17 +2,13 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { test } from '$lib/store';
+	import { messages } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
 	import MqttConnection from '$lib/connect';
-	// import { DroneTelemetryData } from '@mockiot/core/src/drone';
+	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
 
 	export let data: PageData;
-
-	let devices = 'drone';
-	let devicesOptions = ['drone'];
-	let messages = [];
 
 	const { form, enhance } = superForm(data.form, {
 		applyAction: true,
@@ -43,11 +39,11 @@
 		});
 		client.on('message', (_fullTopic, payload) => {
 			let msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
+			const telemetryData: DroneTelemetryData = JSON.parse(msg);
 			if (payload.dup) {
 				console.log(`Received late message: ${msg}`);
 			} else {
-				messages = [...messages, `Topic: ${topic}, Message: ${msg}`];
-				test.update((oldMessages) => [...oldMessages, msg]);
+				messages.update((oldMessages) => [...oldMessages, telemetryData]);
 			}
 		});
 		client.on('error', (error) => {
@@ -106,7 +102,7 @@
 				name="clear"
 				id="clear"
 				on:click={() => {
-					test.set([]);
+					messages.set([]);
 				}}
 			>
 				Clear telemetry!
@@ -114,9 +110,9 @@
 		</div>
 		<h2>Streamed Data</h2>
 		<div class="message-container" style="max-height: 200px; overflow-y: max-width: 50vw;">
-			{#each $test as item}
+			{#each $messages as item}
 				<div class="message" style="max-width: 50vw; display: inline-block;">
-					{item}
+					{JSON.stringify(item)}
 				</div>
 			{/each}
 		</div>

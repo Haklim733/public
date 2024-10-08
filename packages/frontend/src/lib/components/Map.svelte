@@ -5,24 +5,20 @@
 	import { Tile as TileLayer } from 'ol/layer';
 	import { Vector as VectorLayer } from 'ol/layer';
 	import { Vector as VectorSource } from 'ol/source';
-	import { Style, Stroke, Circle, Fill, Text } from 'ol/style';
+	import { Style, Circle, Fill, Text } from 'ol/style';
 	import { transform } from 'ol/proj';
 	import { Point } from 'ol/geom';
-	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
-	import { test } from '$lib/store';
+	import { messages } from '$lib/store';
 
 	let map;
 	let vectorLayer;
 	let vectorSource;
-	let startLocation = transform(
-		[parseFloat(-118.30813539), parseFloat(34.1186197)],
-		'EPSG:4326',
-		'EPSG:3857'
-	);
+	let startingX = -118.30813539;
+	let startingY = 34.1186197;
+	let startLocation = transform([startingX, startingY], 'EPSG:4326', 'EPSG:3857');
 	let center = startLocation;
 	let radius = 1000; // 10k in meters
 	let startFeature = new Feature(new Point(startLocation));
-	// export let messages: DroneTelemetryData[] = [];
 
 	startFeature.setStyle(
 		new Style({
@@ -70,10 +66,10 @@
 	});
 
 	$: {
-		test.subscribe((newMessages) => {
+		messages.subscribe((newMessages) => {
 			const latest = newMessages[newMessages.length - 1];
+			console.log(latest);
 			if (latest) {
-				console.log(latest.longitude, latest.latitude);
 				const point = transform([latest.longitude, latest.latitude], 'EPSG:4326', 'EPSG:3857');
 				const pointFeature = new Feature(new Point(point));
 
@@ -88,6 +84,7 @@
 
 				pointFeature.setStyle(circleStyle);
 				vectorSource.addFeature(pointFeature);
+				console.log('Added feature to vectorSource:', vectorSource.getFeatures());
 				vectorSource.changed();
 			}
 		});

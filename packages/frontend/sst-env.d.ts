@@ -5,10 +5,6 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
-    "ConsumerFunction": {
-      "name": string
-      "type": "sst.aws.Function"
-    }
     "IotServer": {
       "authorizer": string
       "endpoint": string
@@ -21,10 +17,6 @@ declare module "sst" {
     "RT_TOKEN": {
       "type": "sst.sst.Secret"
       "value": string
-    }
-    "mockIotStream": {
-      "name": string
-      "type": "sst.aws.KinesisStream"
     }
   }
 }
