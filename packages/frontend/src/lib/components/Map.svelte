@@ -10,14 +10,29 @@
 	import { Point } from 'ol/geom';
 	import { messages } from '$lib/store';
 
+	const tileCache = {};
+
+	const tileLayer = new TileLayer({
+		source: new XYZ({
+			url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+			tileUrlFunction: function (tileCoord, pixelRatio, projection) {
+				const tileUrl = this.getTileUrl(tileCoord, pixelRatio, projection);
+				const cacheKey = `${tileCoord[0]}-${tileCoord[1]}-${tileCoord[2]}`;
+				if (!tileCache[cacheKey]) {
+					tileCache[cacheKey] = tileUrl;
+				}
+				return tileCache[cacheKey];
+			}
+		})
+	});
+
 	let map;
 	let vectorLayer;
 	let vectorSource;
-	let startingX = -118.30813539;
-	let startingY = 34.1186197;
+	const zoom = 18;
+	let startingX = -118.30049006438229;
+	let startingY = 34.11844295532757;
 	let startLocation = transform([startingX, startingY], 'EPSG:4326', 'EPSG:3857');
-	let center = startLocation;
-	let radius = 1000; // 10k in meters
 	let startFeature = new Feature(new Point(startLocation));
 
 	startFeature.setStyle(
@@ -39,6 +54,13 @@
 			})
 		})
 	);
+	function clearVectorSource() {
+		vectorSource.clear();
+		vectorSource.addFeature(startFeature);
+		vectorSource.changed();
+	}
+
+	export { clearVectorSource };
 
 	vectorSource = new VectorSource();
 	vectorLayer = new VectorLayer({
@@ -57,18 +79,22 @@
 				vectorLayer
 			],
 			view: new View({
-				center: center,
-				zoom: 16
+				center: startLocation,
+				zoom: zoom
 			})
 		});
 
 		vectorSource.addFeature(startFeature);
+
+		map.updateSize();
+		window.addEventListener('resize', () => {
+			map.updateSize();
+		});
 	});
 
 	$: {
 		messages.subscribe((newMessages) => {
 			const latest = newMessages[newMessages.length - 1];
-			console.log(latest);
 			if (latest) {
 				const point = transform([latest.longitude, latest.latitude], 'EPSG:4326', 'EPSG:3857');
 				const pointFeature = new Feature(new Point(point));
@@ -84,7 +110,6 @@
 
 				pointFeature.setStyle(circleStyle);
 				vectorSource.addFeature(pointFeature);
-				console.log('Added feature to vectorSource:', vectorSource.getFeatures());
 				vectorSource.changed();
 			}
 		});

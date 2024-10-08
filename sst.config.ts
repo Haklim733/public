@@ -4,7 +4,7 @@ export default $config({
 	app(input) {
 		return {
 			name: 'mockIot',
-			removal: input?.stage === 'prod' ? 'retain' : 'remove',
+			removal: input?.stage === 'production' ? 'retain' : 'remove',
 			home: 'aws',
 			region: 'us-west-1'
 		};

@@ -19,24 +19,13 @@ export const load = (async ({ fetch, locals }) => {
 		authorizer: authorizer,
 		token: token,
 		appName: appName,
-		stage: stage
+		stage: stage,
+		publishEndpoint: '/api/mock'
 	};
 }) satisfies PageServerLoad;
 
 export const actions = {
-	streamIot: async ({ request, fetch, locals }) => {
-		const formData = await request.formData();
-		const num = formData.get('number');
-
-		const res = await fetch('/api/mock', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ num: num, service: 'iot', sessionId: locals.user.sessionId })
-		});
-		console.log(res);
-
+	default: async ({}) => {
 		return {
 			message: 'success'
 		};

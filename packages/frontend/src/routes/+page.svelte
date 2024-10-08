@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { messages } from '$lib/store';
+	import { messages, mapStore } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
 	import MqttConnection from '$lib/connect';
@@ -17,7 +17,12 @@
 		multipleSubmits: data.stage === 'prod' ? 'prevent' : 'allow',
 		onSubmit: ({ formData, cancel }) => {
 			console.log('submit');
-			streamIot({ duration: $form.duration, sessionId: data.sessionId, service: 'drone' });
+			streamIot({
+				duration: $form.duration,
+				speed: $form.speed,
+				sessionId: data.sessionId,
+				service: 'drone'
+			});
 			cancel();
 		}
 	});
@@ -64,7 +69,7 @@
 
 	// streamIot.js
 	export async function streamIot(props) {
-		const res = await fetch('/api/mock', {
+		const res = await fetch(data.publishEndpoint, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -74,16 +79,25 @@
 
 		return await res.json();
 	}
+
+	let mapComponent;
+
+	function clearMap() {
+		if (mapComponent) {
+			mapComponent.clearVectorSource();
+		}
+	}
 </script>
 
-<div class="App" style="display: flex; height: 100vh; width: 100vw;">
-	<div class="left-container" style="flex: 1; padding: 20px;">
+<div class="App">
+	<div class="left-top-container">
 		<h1>Test Iot Telemetry</h1>
 		<SuperDebug data={$form} />
 		<form method="POST" use:enhance>
 			<label>
 				<label for="duration">Duration (0-60 seconds):</label>
 				<input
+					class="input-box"
 					type="number"
 					min="0"
 					max="60"
@@ -92,8 +106,20 @@
 					bind:value={$form.duration}
 				/>
 			</label>
+			<label>
+				<label for="speed">Speed (m/s):</label>
+				<input
+					class="input-box"
+					type="number"
+					min="1"
+					max="100"
+					name="speed"
+					id="speed"
+					bind:value={$form.speed}
+				/>
+			</label>
 			<div>
-				<button class="btn">Click to simulate iot telemetry!</button>
+				<button class="btn">Click to simulate drone telemetry!</button>
 			</div>
 		</form>
 		<div>
@@ -103,47 +129,90 @@
 				id="clear"
 				on:click={() => {
 					messages.set([]);
+					clearMap();
 				}}
 			>
 				Clear telemetry!
 			</button>
 		</div>
+	</div>
+	<div class="left-bottom-container">
 		<h2>Streamed Data</h2>
-		<div class="message-container" style="max-height: 200px; overflow-y: max-width: 50vw;">
-			{#each $messages as item}
-				<div class="message" style="max-width: 50vw; display: inline-block;">
-					{JSON.stringify(item)}
-				</div>
-			{/each}
-		</div>
+		{#each $messages as item}
+			<div class="message">{JSON.stringify(item)}</div>
+		{/each}
 	</div>
-	<div class="right-container" style="flex: 1; padding: 20px 20px 0 20px; overflow-y: auto;">
-		<div class="map-container" style="width: 100%; height: 300px; border: 1px solid black;">
-			<Map />
-		</div>
+	<div class="right-top-container">
+		<Map bind:this={mapComponent}></Map>
 	</div>
+	<div class="right-bottom-container"></div>
 </div>
 
 <style>
 	.App {
-		height: 100vh;
+		height: 100%;
+		width: 100%;
 		display: grid;
 		text-align: center;
 		place-items: center;
-	}
-	p {
-		margin-top: 0;
-		font-size: 20px;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: auto 1fr;
 	}
 	button {
 		font-size: 21px;
 	}
+	.input-box {
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.left-top-container {
+		grid-column: 1;
+		grid-row: 1;
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 10px;
+		padding: 20px;
+		overflow-y: auto;
+	}
+	.left-bottom-container {
+		grid-column: 1;
+		grid-row: 2;
+		padding: 20px;
+		overflow-y: scroll;
+		height: 50vh;
+		display: block;
+	}
+	.right-top-container {
+		grid-column: 2;
+		grid-row: 1;
+		padding: 20px;
+		height: 100%;
+		width: 100%;
+		align-items: center;
+	}
+	.right-bottom-container {
+		grid-column: 2;
+		grid-row: 2;
+		padding: 20px;
+	}
+
+	#map {
+		height: 100vh;
+		width: 100vw;
+		position: relative;
+	}
 	.message {
+		display: block;
 		overflow-wrap: break-word;
 		word-wrap: break-word;
 		hyphens: auto;
+		max-width: 100%;
+		width: 100%;
+		text-align: justify;
+		padding: 10px;
+		border-bottom: 1px solid #ccc;
 	}
-
 	.message:last-child {
 		border-bottom: none;
 	}
