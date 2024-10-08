@@ -4,10 +4,10 @@ import { rtServer, rtToken } from './realtime';
 let domain = 'localhost';
 let url = 'http://localhost:5173';
 if ($app.stage === 'prod') {
-	domain = 'iamlim.com';
+	domain = 'iot.iamlim.com';
 }
 if ($app.stage === 'dev') {
-	domain = 'dev.iamlim.com';
+	domain = 'iot.dev.iamlim.com';
 }
 url = `https://${domain}`;
 
@@ -16,6 +16,7 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 		autostart: true
 	},
 	buildCommand: 'bun run build',
+	domain: domain,
 	environment: {
 		VITE_STAGE: $app.stage,
 		VITE_DOMAIN: domain
@@ -30,6 +31,15 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 	],
 	server: {
 		memory: '256 MB'
+	},
+	transform: {
+		cdn: {
+			transform: {
+				distribution: (args, opts) => {
+					opts.import = '';
+				}
+			}
+		}
 	}
 });
 
@@ -42,7 +52,7 @@ export const site = new sst.aws.SvelteKit('MockIotSite', {
 // 			name: domain
 // 		},
 // 		routes: {
-// 			'/projects/iot*': site.nodes.server.url
+// 			'/projects/iot*': $output(site.url)
 // 		}
 // 	});
 // }

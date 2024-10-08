@@ -3,15 +3,14 @@
 	import { XYZ } from 'ol/source';
 	import { Map, View, Feature } from 'ol';
 	import { Tile as TileLayer } from 'ol/layer';
-	import { LineString } from 'ol/geom';
 	import { Vector as VectorLayer } from 'ol/layer';
 	import { Vector as VectorSource } from 'ol/source';
 	import { Style, Stroke, Circle, Fill, Text } from 'ol/style';
 	import { transform } from 'ol/proj';
 	import { Point } from 'ol/geom';
 	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
+	import { test } from '$lib/store';
 
-	export let messages: DroneTelemetryData[] = [];
 	let map;
 	let vectorLayer;
 	let vectorSource;
@@ -23,11 +22,12 @@
 	let center = startLocation;
 	let radius = 10000; // 10k in meters
 	let startFeature = new Feature(new Point(startLocation));
+	export let messages: DroneTelemetryData[] = [];
 
 	startFeature.setStyle(
 		new Style({
 			image: new Circle({
-				radius: 10,
+				radius: 4,
 				fill: new Fill({
 					color: 'blue'
 				})
@@ -62,7 +62,7 @@
 			],
 			view: new View({
 				center: center,
-				zoom: 12
+				zoom: 16
 			})
 		});
 
@@ -70,48 +70,27 @@
 	});
 
 	$: {
-		if (messages.length > 1) {
+		// if (messages.length > 1) {
+		test.subscribe((newMessages) => {
 			vectorSource.clear();
-			vectorSource.addFeature(startFeature);
-
-			const lineFeature = new Feature({
-				geometry: new LineString(
-					messages.map((message) => {
-						return transform([message.longitude, message.latitude], 'EPSG:4326', 'EPSG:3857');
-					})
-				)
-			});
-
-			lineFeature.setStyle(
-				new Style({
-					stroke: new Stroke({
-						color: 'blue',
-						width: 2
-					})
-				})
-			);
-
-			vectorSource.addFeature(lineFeature);
-
-			messages.forEach((message, index) => {
-				const [longitude, latitude] = message.split(', ')[1].split(',').map(parseFloat);
-				const point = transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857');
+			messages.forEach((message) => {
+				const point = transform([message.longitude, message.latitude], 'EPSG:4326', 'EPSG:3857');
 				const pointFeature = new Feature(new Point(point));
 
-				pointFeature.setStyle(
-					new Style({
-						image: new Circle({
-							radius: 5,
-							fill: new Fill({
-								color: 'blue'
-							})
+				const circleStyle = new Style({
+					image: new Circle({
+						radius: 5,
+						fill: new Fill({
+							color: 'red'
 						})
 					})
-				);
+				});
 
+				pointFeature.setStyle(circleStyle);
+				vectorSource.addFeature(startFeature);
 				vectorSource.addFeature(pointFeature);
 			});
-		}
+		});
 	}
 </script>
 

@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
 	import mqtt from 'mqtt';
-	import { msg } from '$lib/store';
+	import { test } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
@@ -13,6 +13,7 @@
 
 	let devices = 'drone';
 	let devicesOptions = ['drone'];
+	let messages = [];
 
 	const { form, enhance } = superForm(data.form, {
 		applyAction: true,
@@ -20,9 +21,8 @@
 		resetForm: false,
 		multipleSubmits: data.stage === 'prod' ? 'prevent' : 'allow',
 		onSubmit: ({ formData, cancel }) => {
-			formData.set('sessionId', data.sessionId);
-			formData.set('devices', $form.devices);
-			streamIot({ devices: $form.devices, sessionId: data.sessionId, service: 'drone' });
+			console.log('submit');
+			streamIot({ duration: $form.duration, sessionId: data.sessionId, service: 'drone' });
 			cancel();
 		}
 	});
@@ -35,12 +35,12 @@
 			manualConnect: true,
 			username: '', // Must be empty
 			password: data.token,
-			clientId: data.sessionId
+			clientId: data.sessionId,
+			clean: false
 		});
 	}
 
 	// const client = writable<any | null>(null);
-	let messages = [];
 	let lineFeatures = [];
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 	// topic = `${data.appName}/${data.stage}/iot/test`;
@@ -57,8 +57,13 @@
 			}
 		});
 		client.on('message', (_fullTopic, payload) => {
-			$msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
-			messages = [...messages, `Topic: ${topic}, Message: ${$msg}`];
+			let msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
+			if (payload.dup) {
+				console.log(`Received late message: ${msg}`);
+			} else {
+				messages = [...messages, `Topic: ${topic}, Message: ${msg}`];
+				test.update((oldMessages) => [...oldMessages, msg]);
+			}
 		});
 		client.on('error', (error) => {
 			console.error('Error connecting to MQTT broker:', error);
@@ -94,18 +99,45 @@
 		<SuperDebug data={$form} />
 		<form method="POST" use:enhance>
 			<p>Test Iot Telemetry</p>
+			<label>
+				<label for="duration">Duration (0-60 seconds):</label>
+				<input
+					type="number"
+					min="0"
+					max="60"
+					name="duration"
+					id="duration"
+					bind:value={$form.duration}
+				/>
+			</label>
 			<div>
 				<button class="btn">Click to simulate iot telemetry!</button>
 			</div>
 		</form>
+		<div>
+			<button
+				class="btn"
+				name="clear"
+				id="clear"
+				on:click={() => {
+					test.set([]);
+				}}
+			>
+				Clear telemetry!
+			</button>
+		</div>
+		<h2>Streamed Data</h2>
+		<div class="message-container" style="max-height: 200px; overflow-y: max-width: 50vw;">
+			{#each $test as item}
+				<div class="message" style="max-width: 50vw; display: inline-block;">
+					{item}
+				</div>
+			{/each}
+		</div>
 	</div>
 	<div class="right-container" style="flex: 1; padding: 20px 20px 0 20px; overflow-y: auto;">
 		<div class="map-container" style="width: 100%; height: 300px; border: 1px solid black;">
 			<Map {messages} />
-		</div>
-		<h2>Streamed Data</h2>
-		<div class="message-container" style="max-height: 200px; overflow-y: auto;">
-			{messages}
 		</div>
 	</div>
 </div>
@@ -123,5 +155,14 @@
 	}
 	button {
 		font-size: 21px;
+	}
+	.message {
+		overflow-wrap: break-word;
+		word-wrap: break-word;
+		hyphens: auto;
+	}
+
+	.message:last-child {
+		border-bottom: none;
 	}
 </style>
