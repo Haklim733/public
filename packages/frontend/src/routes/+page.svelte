@@ -2,9 +2,10 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { messages, mapStore } from '$lib/store';
+	import { messages } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
+	// import TsChart from '$lib/components/TsChart.svelte';
 	import MqttConnection from '$lib/connect';
 	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
@@ -99,7 +100,6 @@
 		<form method="POST" use:enhance>
 			<Label for="duration">Duration (0-60 seconds):</Label>
 			<Input
-				class="input-box"
 				type="number"
 				min="0"
 				max="60"
@@ -108,15 +108,7 @@
 				bind:value={$form.duration}
 			/>
 			<Label for="speed">Speed (m/s):</Label>
-			<Input
-				class="input-box"
-				type="number"
-				min="1"
-				max="100"
-				name="speed"
-				id="speed"
-				bind:value={$form.speed}
-			/>
+			<Input type="number" min="1" max="100" name="speed" id="speed" bind:value={$form.speed} />
 			<div>
 				<Button class="btn">Click to simulate drone telemetry!</Button>
 			</div>
@@ -145,6 +137,7 @@
 		<Map bind:this={mapComponent}></Map>
 	</div>
 	<div class="right-bottom-container"></div>
+	<!-- <TsChart></TsChart> -->
 </div>
 
 <style>
@@ -156,11 +149,6 @@
 		place-items: center;
 		grid-template-columns: 1fr 1fr;
 		grid-template-rows: auto 1fr;
-	}
-	.input-box {
-		display: block;
-		margin-left: auto;
-		margin-right: auto;
 	}
 	.left-top-container {
 		grid-column: 1;
@@ -191,12 +179,8 @@
 		grid-column: 2;
 		grid-row: 2;
 		padding: 20px;
-	}
-
-	#map {
-		height: 100vh;
-		width: 100vw;
-		position: relative;
+		height: 100%;
+		width: 100%;
 	}
 	.message {
 		display: block;

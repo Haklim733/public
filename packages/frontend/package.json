@@ -28,6 +28,8 @@
 	},
 	"dependencies": {
 		"@mockiot/core": "workspace:*",
+		"@unovis/svelte": "^1.4.3-beta.0",
+		"@unovis/ts": "^1.4.3-beta.0",
 		"bits-ui": "^0.21.16",
 		"clsx": "^2.1.1",
 		"lucide-svelte": "^0.451.0",
