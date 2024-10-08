@@ -4,46 +4,49 @@ import { Resource } from 'sst';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
 import type { RequestEvent } from '@sveltejs/kit';
 
-const iotClient = new IoTDataPlaneClient({});
-
 export async function POST({ request }: RequestEvent) {
-	const { devices, sessionId, service } = await request.json();
+	const { sessionId, service } = await request.json();
 
 	let topic = '';
-	console.log(`smock/+server.ts: ${devices}, ${service}, ${sessionId}`);
+	console.log(`smock/+server.ts: ${service}, ${sessionId}`);
 
-	for (let i = 0; i <= devices; i++) {
-		if (service === 'iot') {
-			topic = `${Resource.App.name}/${Resource.App.stage}/iot/test`;
-			console.log(topic);
-			const payload = generateDroneTelemetryData(`mockIot-${i}`);
-			// client!.publish(topic, JSON.stringify(payload));
-			let res = await iotClient.send(
-				new PublishCommand({
-					payload: Buffer.from(JSON.stringify(payload)),
-					topic: topic
-				})
-			);
-			console.log(await res);
-		} else if (service === 'kinesis') {
-			let iotData: string = btoa(JSON.stringify(generateARVisionData(`device${i}`)));
-			let buffer = Buffer.from(iotData, 'base64');
-			topic = sessionId;
-			let input = new PutRecordCommand({
-				StreamName: Resource.mockIotStream.name,
-				Data: new Uint8Array(buffer),
-				PartitionKey: topic
-			});
-			await kenesisClient
-				.send(input)
-				.then((data) => {})
-				.catch((error) => {
-					return { message: 'failed!' };
-				})
-				.finally(() => {
-					message = `pushed telemetry to ${Resource.mockIotStream.name} using ;`;
-				});
-		}
+	if (service === 'drone') {
+		const startLocation = { latitude: 34.1186197, longitude: -118.30813539, altitude: 346 };
+		const endLocation = { latitude: 34.16242, longitude: -118.16787, altitude: 20 };
+		const numPoints = 11;
+		const speed = 5; //meter per second
+		const altitude = 15;
+		const device = 'mockIot';
+		topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;
+		generateDroneTelemetryData(
+			device,
+			startLocation,
+			endLocation,
+			numPoints,
+			speed,
+			altitude,
+			true,
+			topic
+		);
+	} else if (service === 'kinesis') {
+		// 	let iotData: string = btoa(JSON.stringify(generateARVisionData(`device${i}`)));
+		// 	let buffer = Buffer.from(iotData, 'base64');
+		// 	topic = sessionId;
+		// 	let input = new PutRecordCommand({
+		// 		StreamName: Resource.mockIotStream.name,
+		// 		Data: new Uint8Array(buffer),
+		// 		PartitionKey: topic
+		// 	});
+		// 	await kenesisClient
+		// 		.send(input)
+		// 		.then((data) => {})
+		// 		.catch((error) => {
+		// 			return { message: 'failed!' };
+		// 		})
+		// 		.finally(() => {
+		// 			message = `pushed telemetry to ${Resource.mockIotStream.name} using ;`;
+		// 		});
+		// }
 	}
 
 	return new Response(JSON.stringify({ message: 'success' }), {

@@ -1,4 +1,7 @@
-interface DroneTelemetryData {
+import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
+
+const iotClient = new IoTDataPlaneClient({});
+export interface DroneTelemetryData {
 	device: string;
 	timestamp: number;
 	latitude: number;
@@ -20,66 +23,84 @@ interface DroneTelemetryData {
 interface PathPoint {
 	latitude: number;
 	longitude: number;
-	altitude: number;
+	altitude: number; //meters
 }
 
-export function generateDroneTelemetryData(
+export async function generateDroneTelemetryData(
 	device: string,
 	startLocation: PathPoint,
 	endLocation: PathPoint,
-	numPoints: number,
+	duration: number, // in seconds
 	speed: number,
-	altitude: number
-): DroneTelemetryData[] {
-	if (numPoints <= 0) {
-		throw new Error('numPoints must be a positive integer');
-	}
-	const pathPoints: PathPoint[] = [];
-	for (let i = 0; i < numPoints; i++) {
-		const lat =
-			startLocation.latitude +
-			(endLocation.latitude - startLocation.latitude) * (i / (numPoints - 1));
-		const lon =
-			startLocation.longitude +
-			(endLocation.longitude - startLocation.longitude) * (i / (numPoints - 1));
-		pathPoints.push({ latitude: lat, longitude: lon, altitude });
-	}
+	altitude: number,
+	push: boolean = false,
+	topic: string
+): Promise<void> {
+	const direction = getDirection(startLocation, endLocation);
+	const velocityX = speed * Math.cos(direction);
+	const velocityY = speed * Math.sin(direction);
 
-	const telemetryData: DroneTelemetryData[] = [];
-	for (let i = 0; i < pathPoints.length; i++) {
-		const point = pathPoints[i];
-		const timestamp = Date.now(); // assume 1 second between each point
-		const velocityX = speed * Math.cos(Math.PI / 4); // assume constant speed and direction
-		const velocityY = speed * Math.sin(Math.PI / 4);
-		const velocityZ = 0;
-		const accelerationX = 0;
-		const accelerationY = 0;
-		const accelerationZ = 0;
-		const roll = 0;
-		const pitch = 0;
-		const yaw = 0;
-		const batteryVoltage = 12;
-		const batteryCurrent = 1;
+	let currentLocation = startLocation;
+	let timestamp = Date.now();
 
-		telemetryData.push({
+	for (let i = 0; i < duration; i++) {
+		const telemetryData: DroneTelemetryData = {
 			device,
 			timestamp,
-			latitude: point.latitude,
-			longitude: point.longitude,
-			altitude: point.altitude,
+			latitude: currentLocation.latitude,
+			longitude: currentLocation.longitude,
+			altitude,
 			velocityX,
 			velocityY,
-			velocityZ,
-			accelerationX,
-			accelerationY,
-			accelerationZ,
-			roll,
-			pitch,
-			yaw,
-			batteryVoltage,
-			batteryCurrent
-		});
-	}
+			velocityZ: 0,
+			accelerationX: 0,
+			accelerationY: 0,
+			accelerationZ: 0,
+			roll: 0,
+			pitch: 0,
+			yaw: 0,
+			batteryVoltage: 12,
+			batteryCurrent: 1
+		};
 
-	return telemetryData;
+		if (push) {
+			let res = await iotClient.send(
+				new PublishCommand({
+					payload: Buffer.from(JSON.stringify(telemetryData)),
+					topic: topic
+				})
+			);
+		}
+
+		currentLocation = updateLocation(currentLocation, velocityX, velocityY, speed);
+		timestamp += 1000;
+
+		await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for 1 second
+	}
+}
+
+function getDirection(startLocation: PathPoint, endLocation: PathPoint): number {
+	const lat1 = (startLocation.latitude * Math.PI) / 180;
+	const lon1 = (startLocation.longitude * Math.PI) / 180;
+	const lat2 = (endLocation.latitude * Math.PI) / 180;
+	const lon2 = (endLocation.longitude * Math.PI) / 180;
+
+	const dlon = lon2 - lon1;
+
+	return Math.atan2(
+		Math.sin(dlon) * Math.cos(lat2),
+		Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dlon)
+	);
+}
+
+function updateLocation(
+	currentLocation: PathPoint,
+	velocityX: number,
+	velocityY: number,
+	speed: number
+): PathPoint {
+	const lat = currentLocation.latitude + (velocityY / speed) * 0.00001;
+	const lon = currentLocation.longitude + (velocityX / speed) * 0.00001;
+
+	return { latitude: lat, longitude: lon, altitude: currentLocation.altitude };
 }
