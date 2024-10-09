@@ -5,7 +5,6 @@
 	import { messages } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
-	import TsChart from '$lib/components/TsChart.svelte';
 	import MqttConnection from '$lib/connect';
 	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
@@ -148,9 +147,7 @@
 	<div class="right-top-container">
 		<Map bind:this={mapComponent}></Map>
 	</div>
-	<div class="right-bottom-container">
-		<TsChart bind:this={vizComponent} />
-	</div>
+	<div class="right-bottom-container"></div>
 </div>
 
 <style>

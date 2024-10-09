@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { messages } from '$lib/store';
-	import { VisXYContainer, VisLine, VisAxis } from '@unovis/svelte';
 	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
 
 	let chartData: DroneTelemetryData[] = [];
@@ -22,7 +21,3 @@
 
 	export { clearVizData };
 </script>
-
-<VisXYContainer data={chartData}>
-	<VisLine {x} {y} />
-</VisXYContainer>
