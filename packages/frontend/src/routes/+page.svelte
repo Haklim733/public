@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { messages } from '$lib/store';
+	import { messages, waypoints } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
 	import MqttConnection from '$lib/connect';
@@ -12,6 +12,7 @@
 	import * as Form from '$lib/components/ui/form';
 
 	export let data: PageData;
+
 	const form = superForm(data.form, {
 		applyAction: true,
 		invalidateAll: false,
@@ -20,12 +21,13 @@
 		onSubmit: ({ formData, cancel }) => {
 			console.log(formData);
 			console.log('submit');
-			streamIot({
-				duration: formData.get('duration'),
-				speed: formData.get('speed'),
-				sessionId: data.sessionId,
-				service: 'drone'
-			});
+			console.log($waypoints);
+			// streamIot({
+			// 	duration: formData.get('duration'),
+			// 	speed: formData.get('speed'),
+			// 	sessionId: data.sessionId,
+			// 	service: 'drone'
+			// });
 			cancel();
 		}
 	});
@@ -34,43 +36,43 @@
 
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 
-	if (browser) {
-		// const client = createConnection(data.endpoint, data.authorizer);
-		const mqttConnection = MqttConnection.getInstance();
-		mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
-		const client = mqttConnection.getClient();
-		client.on('connect', () => {
-			try {
-				client.subscribe(topic, { qos: 1 });
-				console.log('connected to MQTT');
-			} catch (e) {
-				console.log(e);
-			}
-		});
-		client.on('message', (_fullTopic, payload) => {
-			let msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
-			const telemetryData: DroneTelemetryData = JSON.parse(msg);
-			if (payload.dup) {
-				console.log(`Received late message: ${msg}`);
-			} else {
-				messages.update((oldMessages) => [...oldMessages, telemetryData]);
-			}
-		});
-		client.on('error', (error) => {
-			console.error('Error connecting to MQTT broker:', error);
-		});
-		client.on('offline', () => {
-			console.log('Offline from MQTT broker');
-		});
-		client.on('close', () => {
-			console.log('Disconnected from MQTT broker');
-		});
-		client.connect();
+	// if (browser) {
+	// 	// const client = createConnection(data.endpoint, data.authorizer);
+	// 	const mqttConnection = MqttConnection.getInstance();
+	// 	mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
+	// 	const client = mqttConnection.getClient();
+	// 	client.on('connect', () => {
+	// 		try {
+	// 			client.subscribe(topic, { qos: 1 });
+	// 			console.log('connected to MQTT');
+	// 		} catch (e) {
+	// 			console.log(e);
+	// 		}
+	// 	});
+	// 	client.on('message', (_fullTopic, payload) => {
+	// 		let msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
+	// 		const telemetryData: DroneTelemetryData = JSON.parse(msg);
+	// 		if (payload.dup) {
+	// 			console.log(`Received late message: ${msg}`);
+	// 		} else {
+	// 			messages.update((oldMessages) => [...oldMessages, telemetryData]);
+	// 		}
+	// 	});
+	// 	client.on('error', (error) => {
+	// 		console.error('Error connecting to MQTT broker:', error);
+	// 	});
+	// 	client.on('offline', () => {
+	// 		console.log('Offline from MQTT broker');
+	// 	});
+	// 	client.on('close', () => {
+	// 		console.log('Disconnected from MQTT broker');
+	// 	});
+	// 	client.connect();
 
-		window.addEventListener('beforeunload', () => {
-			mqttConnection.disconnect();
-		});
-	}
+	// 	window.addEventListener('beforeunload', () => {
+	// 		mqttConnection.disconnect();
+	// 	});
+	// }
 
 	// streamIot.js
 	export async function streamIot(props) {
@@ -98,6 +100,17 @@
 			vizComponent.clearVizData();
 		}
 	}
+	let latitude = 0;
+	let longitude = 0;
+
+	function setCoordinates(event) {
+		if (mapComponent) {
+			const { lat, lng } = mapComponent.map.latLngToLatLng(event.latlng);
+			latitude = lat;
+			longitude = lng;
+		}
+	}
+	console.log(longitude);
 </script>
 
 <div class="App">
@@ -132,9 +145,10 @@
 					messages.set([]);
 					clearMap();
 					clearViz();
+					waypoints.set([]);
 				}}
 			>
-				Clear telemetry!
+				Clear
 			</Button>
 		</div>
 	</div>
@@ -145,7 +159,7 @@
 		{/each}
 	</div> -->
 	<div class="right-top-container">
-		<Map bind:this={mapComponent}></Map>
+		<Map bind:this={mapComponent}>on:click={setCoordinates}</Map>
 	</div>
 	<div class="right-bottom-container"></div>
 </div>
