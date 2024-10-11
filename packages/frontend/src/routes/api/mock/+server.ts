@@ -13,7 +13,8 @@ export async function POST({ request }: RequestEvent) {
 	if (service === 'drone') {
 		const startLocation = { latitude: latitude, longitude: longitude, altitude: 346 };
 		const altitude = 15;
-		const duration = 5;
+		const duration = 15;
+		const signalTime = 500; //ms
 		const device = 'drone';
 		topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;
 		console.log(waypoints);
@@ -24,6 +25,7 @@ export async function POST({ request }: RequestEvent) {
 			duration,
 			speed,
 			altitude,
+			signalTime,
 			true,
 			topic
 		);

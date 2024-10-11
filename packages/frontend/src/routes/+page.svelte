@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
@@ -12,16 +13,25 @@
 	import * as Form from '$lib/components/ui/form';
 	import { z } from 'zod';
 
+	let idleTime = 0; // Time user has been idle
+	let idleLimit = 5 * 60 * 1000; // x minutes (5 minutes in milliseconds)
+	let idleTimeout;
+
 	const waypointSchema = z.object({
 		latitude: z.number(),
 		longitude: z.number()
 	});
 
-	const waypointsSchema = z.array(waypointSchema).min(1, 'Waypoints cannot be empty');
+	const waypointsSchema = z
+		.array(waypointSchema)
+		.min(1, 'Waypoints cannot be empty')
+		.max(10, 'Too many waypoints');
 
 	export const iotFormSchema = z.object({
-		number: z.number().min(1).max(5),
-		waypoints: waypointsSchema
+		waypoints: waypointsSchema,
+		speed: z.number().min(10).max(100),
+		sessionId: z.string(),
+		service: z.string()
 	});
 
 	export let data: PageData;
@@ -38,6 +48,7 @@
 				sessionId: data.sessionId,
 				service: 'drone'
 			};
+			console.log(JSON.stringify(dataToSend));
 			iotFormSchema.safeParse(dataToSend);
 			streamIot(dataToSend);
 			cancel();
@@ -49,6 +60,32 @@
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 
 	if (browser) {
+		onMount(() => {
+			trackUserActivity();
+		});
+
+		// Function to reset the idle timer whenever there is user activity
+		function resetIdleTimer() {
+			clearTimeout(idleTimeout); // Clear the previous timeout
+			startIdleTimer(); // Start a new idle timer
+		}
+
+		// Initialize and track user activity
+		function trackUserActivity() {
+			window.addEventListener('mousemove', resetIdleTimer);
+			window.addEventListener('keydown', resetIdleTimer);
+			window.addEventListener('touchstart', resetIdleTimer);
+			window.addEventListener('scroll', resetIdleTimer);
+
+			startIdleTimer(); // Start the initial timer
+		}
+
+		function startIdleTimer() {
+			idleTimeout = setTimeout(() => {
+				mqttConnection.disconnect();
+				mqttConnection.close();
+			}, idleLimit);
+		}
 		const mqttConnection = MqttConnection.getInstance();
 		mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
 		const client = mqttConnection.getClient();
@@ -82,6 +119,14 @@
 
 		window.addEventListener('beforeunload', () => {
 			mqttConnection.disconnect();
+		});
+
+		onDestroy(() => {
+			window.removeEventListener('mousemove', resetIdleTimer);
+			window.removeEventListener('keydown', resetIdleTimer);
+			window.removeEventListener('touchstart', resetIdleTimer);
+			window.removeEventListener('scroll', resetIdleTimer);
+			clearTimeout(idleTimeout); // Clear the idle timer
 		});
 	}
 
@@ -121,7 +166,6 @@
 			longitude = lng;
 		}
 	}
-	console.log(longitude);
 </script>
 
 <div class="App">

@@ -31,7 +31,7 @@
 	let map;
 	let vectorLayer;
 	let vectorSource;
-	const zoom = 19;
+	const zoom = 18;
 	let startingX = -118.30049006438229;
 	let startingY = 34.11844295532757;
 	let startLocation = transform([startingX, startingY], 'EPSG:4326', 'EPSG:3857');
