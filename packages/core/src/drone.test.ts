@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import { genDroneTelemetry } from './drone';
 import geolib from 'geolib';
 
-test('update location', async () => {
+test('update location', () => {
 	const startLocation = { latitude: 37.7749, longitude: -122.4194 };
 	const speed = 1000;
 	const time = 1;
@@ -11,25 +11,27 @@ test('update location', async () => {
 	const bearing = 90;
 	const newLocation = geolib.computeDestinationPoint(startLocation, distance, bearing);
 	const distance2 = geolib.getDistance(startLocation, newLocation);
-	console.log(`Distance: ${JSON.stringify(newLocation)} meters`);
+	console.log(`newLocation: ${JSON.stringify(newLocation)}`);
 	console.log(`Distance: ${distance2} meters`);
 
-	expect(distance).toBeCloseTo(speed * time, 0); // expect distance to be close to 1000
+	expect(Math.abs(distance - distance2)).toBeLessThanOrEqual(1); // expect distance to be close to 1000
 });
 
-test('generateDroneTelemetryData returns telemetry data for a single waypoint', async () => {
+test('drone telemetry returns telemetry data for multiple waypoints', async () => {
 	const startLocation = { latitude: 37.7749, longitude: -122.4194, altitude: 10 };
 	const device = 'test';
 	const speed = 100;
 	const altitude = 15;
-	const duration = 3;
+	const duration = 4;
 	const distance = speed * duration; // meters
 	const bearing = 90;
 
 	const waypoint = geolib.computeDestinationPoint(startLocation, distance, bearing);
+	const waypoint2 = geolib.computeDestinationPoint(startLocation, distance * 100, bearing);
 
-	const waypoints = [waypoint];
-	console.log(waypoint);
+	const waypoints = [waypoint, waypoint2];
+	console.log(JSON.stringify(waypoint));
+	console.log(JSON.stringify(waypoint2));
 
 	const telemetryData = await genDroneTelemetry(
 		device,
@@ -43,4 +45,19 @@ test('generateDroneTelemetryData returns telemetry data for a single waypoint', 
 	);
 
 	expect(telemetryData).toBeUndefined(); // Note: generateDroneTelemetryData returns void
+});
+
+test('test that getRhumbLineBearing is similar', async () => {
+	const startLocation = { latitude: 37.7749, longitude: -122.4194, altitude: 10 };
+	const speed = 100;
+	const duration = 3;
+	const distance = speed * duration; // meters
+	const endLoc = {
+		latitude: 37.774407725758216,
+		longitude: -122.07806993387254
+	};
+
+	const bearing = geolib.getRhumbLineBearing(startLocation, endLoc);
+	console.log(`bearing: ${bearing}`);
+	expect(bearing).toBeCloseTo(90, 0); //0.1 degree threshold
 });
