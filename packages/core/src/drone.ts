@@ -34,81 +34,87 @@ export async function genDroneTelemetry(
 	topic: string
 ): Promise<void> {
 	let currentLocation = startLocation;
-	let initialTimestamp = Date.now();
 	let currentWaypointIndex = 0;
 	let timeElapsed = 0;
 	let data: DroneTelemetryData[] = [];
 	let currentTimestamp;
+	const path = calculatePath(waypoints, speed);
 
 	if (waypoints.length === 0) {
 		throw new Error('Waypoints array cannot be empty');
 	}
-	const threshold = 0.1;
-	let i = 0;
+	const threshold = speed * 0.99;
+	let totalTime = 0;
 
-	while (timeElapsed < duration && i < waypoints.length) {
-		i++;
-
+	while (totalTime < duration && currentWaypointIndex < waypoints.length) {
 		const waypoint = waypoints[currentWaypointIndex];
 		let distanceToWaypoint = geolib.getDistance(currentLocation, waypoint);
+		let lastDistanceToWaypoint = distanceToWaypoint;
 
-		while (distanceToWaypoint > threshold) {
-			const randomTimeout = getRandomInt(1000, 2000);
-			await new Promise((resolve) => setTimeout(resolve, randomTimeout));
+		while (distanceToWaypoint > threshold && totalTime < duration) {
+			let lastTimeStamp = Date.now();
+			// const randomTimeout = getRandomInt(1000, 1000);
+			// await new Promise((resolve) => setTimeout(resolve, randomTimeout));
 			currentTimestamp = Date.now();
-			timeElapsed = (initialTimestamp - currentTimestamp) / 1000;
+			timeElapsed = (currentTimestamp - lastTimeStamp) / 1000;
+			totalTime += timeElapsed;
 
 			// Update current location
-			distanceToWaypoint = geolib.getDistance(currentLocation, waypoint);
-			let bearing = geolib.getRhumbLineBearing(currentLocation, waypoint);
-			currentLocation = geolib.computeDestinationPoint(
-				currentLocation,
-				distanceToWaypoint,
-				bearing
-			);
+			// distanceToWaypoint = geolib.getDistance(currentLocation, waypoint);
+			let bearing = geolib.getRhumbLineBearing(currentLocation, waypoint); //first is initial
+			let distance = speed * timeElapsed;
+			console.log('distance: ' + distance);
+			currentLocation = geolib.computeDestinationPoint(currentLocation, distance, bearing);
 			console.log(`Time Elapsed: ${timeElapsed}`);
 			console.log(`current location: ${JSON.stringify(currentLocation)}`);
+			console.log('Total time: ' + totalTime);
 
 			// Update distance to waypoint
 			distanceToWaypoint = geolib.getDistance(currentLocation, waypoint);
+			if (distanceToWaypoint > lastDistanceToWaypoint) {
+				distanceToWaypoint = 0;
+				currentLocation = waypoint;
+				console.log(`too great of a difference 0`);
+			}
+			lastDistanceToWaypoint = distanceToWaypoint;
 			console.log(`distance to waypoint ${JSON.stringify(waypoint)}: ${distanceToWaypoint}`);
+
+			const telemetryData: DroneTelemetryData = {
+				device,
+				timestamp: currentTimestamp!,
+				latitude: currentLocation.latitude,
+				longitude: currentLocation.longitude,
+				altitude,
+				accelerationX: 0,
+				accelerationY: 0,
+				accelerationZ: 0,
+				roll: 0,
+				pitch: 0,
+				yaw: 0,
+				batteryVoltage: 12,
+				batteryCurrent: 1
+			};
+
+			if (push) {
+				let res = await iotClient.send(
+					new PublishCommand({
+						payload: Buffer.from(JSON.stringify(telemetryData)),
+						topic: topic,
+						qos: 1
+					})
+				);
+			}
+
+			data.push(telemetryData);
+
+			// Check if current location is close enough to waypoint
+			if (distanceToWaypoint <= threshold) {
+				console.log('WAYPOINT INDEX: ' + currentWaypointIndex);
+				currentWaypointIndex++;
+			}
 		}
-
-		const telemetryData: DroneTelemetryData = {
-			device,
-			timestamp: currentTimestamp!,
-			latitude: currentLocation.latitude,
-			longitude: currentLocation.longitude,
-			altitude,
-			accelerationX: 0,
-			accelerationY: 0,
-			accelerationZ: 0,
-			roll: 0,
-			pitch: 0,
-			yaw: 0,
-			batteryVoltage: 12,
-			batteryCurrent: 1
-		};
-
-		if (push) {
-			let res = iotClient.send(
-				new PublishCommand({
-					payload: Buffer.from(JSON.stringify(telemetryData)),
-					topic: topic,
-					qos: 1
-				})
-			);
-		}
-
-		data.push(telemetryData);
-
-		// Check if current location is close enough to waypoint
-		if (distanceToWaypoint <= threshold) {
-			currentWaypointIndex++;
-		}
-
-		// update Timestamp
 	}
+	console.log('finished sending telemetry');
 }
 
 function getRandomInt(min: number, max: number) {
@@ -116,3 +122,27 @@ function getRandomInt(min: number, max: number) {
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export const calculatePath = (waypoints: PathPoint[], droneSpeed: number): PathPoint[] => {
+	const path = [];
+	console.log(waypoints);
+	for (let i = 0; i < waypoints.length - 1; i++) {
+		const currentWaypoint = waypoints[i];
+		const nextWaypoint = waypoints[i + 1];
+		const distance = geolib.getDistance(currentWaypoint, nextWaypoint);
+		const bearing = geolib.getRhumbLineBearing(currentWaypoint, nextWaypoint);
+		const duration = distance / droneSpeed;
+		const numPoints = Math.ceil(duration);
+		for (let j = 0; j < numPoints; j++) {
+			const point = geolib.computeDestinationPoint(currentWaypoint, j * droneSpeed, bearing);
+			path.push(point);
+			if (j == 50) {
+				break;
+			}
+		}
+		if (i == 50) {
+			break;
+		}
+	}
+	return path;
+};

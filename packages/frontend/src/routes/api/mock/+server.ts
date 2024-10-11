@@ -3,7 +3,7 @@ import { Resource } from 'sst';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export async function POST({ request }: RequestEvent) {
-	const { waypoints, duration, sessionId, service, speed } = await request.json();
+	const { waypoints, sessionId, service, speed } = await request.json();
 
 	let topic = '';
 	console.log(`smock/+server.ts: ${service}, ${sessionId}`);
@@ -13,6 +13,7 @@ export async function POST({ request }: RequestEvent) {
 	if (service === 'drone') {
 		const startLocation = { latitude: latitude, longitude: longitude, altitude: 346 };
 		const altitude = 15;
+		const duration = 5;
 		const device = 'drone';
 		topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;
 		console.log(waypoints);

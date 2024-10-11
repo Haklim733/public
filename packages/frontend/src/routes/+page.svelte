@@ -10,6 +10,19 @@
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import * as Form from '$lib/components/ui/form';
+	import { z } from 'zod';
+
+	const waypointSchema = z.object({
+		latitude: z.number(),
+		longitude: z.number()
+	});
+
+	const waypointsSchema = z.array(waypointSchema).min(1, 'Waypoints cannot be empty');
+
+	export const iotFormSchema = z.object({
+		number: z.number().min(1).max(5),
+		waypoints: waypointsSchema
+	});
 
 	export let data: PageData;
 
@@ -19,13 +32,14 @@
 		resetForm: false,
 		multipleSubmits: data.stage === 'prod' ? 'prevent' : 'allow',
 		onSubmit: ({ formData, cancel }) => {
-			streamIot({
+			const dataToSend = {
 				waypoints: $waypoints,
-				duration: formData.get('duration'),
 				speed: formData.get('speed'),
 				sessionId: data.sessionId,
 				service: 'drone'
-			});
+			};
+			iotFormSchema.safeParse(dataToSend);
+			streamIot(dataToSend);
 			cancel();
 		}
 	});
@@ -115,20 +129,13 @@
 		<h1>Test Iot Telemetry</h1>
 		<SuperDebug data={$formData} />
 		<form method="POST" use:enhance>
-			<Form.Field {form} name="duration">
-				<Form.Control let:attrs>
-					<Form.Label>Duration</Form.Label>
-					<Input {...attrs} bind:value={$formData.duration} />
-				</Form.Control>
-				<Form.Description>This is the duration of the flight (seconds).</Form.Description>
-				<Form.FieldErrors />
-			</Form.Field>
 			<Form.Field {form} name="speed">
 				<Form.Control let:attrs>
 					<Form.Label>Speed</Form.Label>
 					<Input {...attrs} bind:value={$formData.speed} />
 				</Form.Control>
 				<Form.Description>This is the speed of the drone (m/s)</Form.Description>
+				<Form.Description>*max duration of flight is limited to 15 seconds</Form.Description>
 				<Form.FieldErrors />
 			</Form.Field>
 			<Form.Button>Submit</Form.Button>
