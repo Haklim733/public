@@ -1,4 +1,5 @@
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
+import geolib from 'geolib';
 
 const iotClient = new IoTDataPlaneClient({});
 export interface DroneTelemetryData {
@@ -7,9 +8,6 @@ export interface DroneTelemetryData {
 	latitude: number;
 	longitude: number;
 	altitude: number;
-	velocityX: number;
-	velocityY: number;
-	velocityZ: number;
 	accelerationX: number;
 	accelerationY: number;
 	accelerationZ: number;
@@ -23,84 +21,88 @@ export interface DroneTelemetryData {
 interface PathPoint {
 	latitude: number;
 	longitude: number;
-	altitude: number; //meters
 }
 
-export async function generateDroneTelemetryData(
+export async function genDroneTelemetry(
 	device: string,
+	waypoints: PathPoint[],
 	startLocation: PathPoint,
-	endLocation: PathPoint,
 	duration: number, // in seconds
 	speed: number,
 	altitude: number,
 	push: boolean = false,
 	topic: string
 ): Promise<void> {
-	const direction = getDirection(startLocation, endLocation);
-	const velocityX = speed * Math.cos(direction);
-	const velocityY = speed * Math.sin(direction);
-
 	let currentLocation = startLocation;
 	let timestamp = Date.now();
+	let currentWaypointIndex = 0;
+	let seconds = 0;
+	let data: DroneTelemetryData[] = [];
+	if (waypoints.length === 0) {
+		throw new Error('Waypoints array cannot be empty');
+	}
+	const threshold = 0.01;
+	let i = 0;
+	let distance = 0;
 
-	for (let i = 0; i < duration; i++) {
-		const telemetryData: DroneTelemetryData = {
-			device,
-			timestamp,
-			latitude: currentLocation.latitude,
-			longitude: currentLocation.longitude,
-			altitude,
-			velocityX,
-			velocityY,
-			velocityZ: 0,
-			accelerationX: 0,
-			accelerationY: 0,
-			accelerationZ: 0,
-			roll: 0,
-			pitch: 0,
-			yaw: 0,
-			batteryVoltage: 12,
-			batteryCurrent: 1
-		};
+	while (seconds < duration && i < waypoints.length) {
+		console.log(`printing seconds: ${seconds}`);
+		seconds++;
+		i++;
 
-		if (push) {
-			let res = await iotClient.send(
-				new PublishCommand({
-					payload: Buffer.from(JSON.stringify(telemetryData)),
-					topic: topic
-				})
-			);
+		const waypoint = waypoints[currentWaypointIndex];
+		let distanceToWaypoint = geolib.getDistance(currentLocation, waypoint);
+
+		while (distanceToWaypoint > threshold) {
+			const randomTimeout = getRandomInt(1000, 2000);
+			await new Promise((resolve) => setTimeout(resolve, randomTimeout));
+			const telemetryData: DroneTelemetryData = {
+				device,
+				timestamp,
+				latitude: currentLocation.latitude,
+				longitude: currentLocation.longitude,
+				altitude,
+				accelerationX: 0,
+				accelerationY: 0,
+				accelerationZ: 0,
+				roll: 0,
+				pitch: 0,
+				yaw: 0,
+				batteryVoltage: 12,
+				batteryCurrent: 1
+			};
+
+			if (push) {
+				let res = await iotClient.send(
+					new PublishCommand({
+						payload: Buffer.from(JSON.stringify(telemetryData)),
+						topic: topic,
+						qos: 1
+					})
+				);
+			}
+
+			data.push(telemetryData);
+
+			// Update current location
+			distance = speed * seconds;
+			const bearing = geolib.getRhumbLineBearing(startLocation, waypoint);
+			currentLocation = geolib.computeDestinationPoint(currentLocation, distance, bearing);
+
+			// Update distance to waypoint
+			distanceToWaypoint = geolib.getDistance(currentLocation, waypoint);
+			console.log(distanceToWaypoint);
 		}
 
-		currentLocation = updateLocation(currentLocation, velocityX, velocityY, speed);
-		const randomTime = Math.random() * 1000;
-		timestamp += randomTime;
-		await new Promise((resolve) => setTimeout(resolve, randomTime)); // wait for between 1 and 2 seconds
+		// Check if current location is close enough to waypoint
+		if (distanceToWaypoint <= threshold) {
+			currentWaypointIndex++;
+		}
 	}
 }
 
-function getDirection(startLocation: PathPoint, endLocation: PathPoint): number {
-	const lat1 = (startLocation.latitude * Math.PI) / 180;
-	const lon1 = (startLocation.longitude * Math.PI) / 180;
-	const lat2 = (endLocation.latitude * Math.PI) / 180;
-	const lon2 = (endLocation.longitude * Math.PI) / 180;
-
-	const dlon = lon2 - lon1;
-
-	return Math.atan2(
-		Math.sin(dlon) * Math.cos(lat2),
-		Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dlon)
-	);
-}
-
-function updateLocation(
-	currentLocation: PathPoint,
-	velocityX: number,
-	velocityY: number,
-	speed: number
-): PathPoint {
-	const lat = currentLocation.latitude + (velocityY / speed) * 0.00001;
-	const lon = currentLocation.longitude + (velocityX / speed) * 0.00001;
-
-	return { latitude: lat, longitude: lon, altitude: currentLocation.altitude };
+function getRandomInt(min: number, max: number) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 }

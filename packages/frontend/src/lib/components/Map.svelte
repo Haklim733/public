@@ -111,6 +111,7 @@
 			const lonLat = toLonLat(coordinates);
 			const latitude = lonLat[1];
 			const longitude = lonLat[0];
+			console.log(longitude, latitude);
 			$waypoints.push({ latitude: latitude, longitude: longitude });
 		});
 
@@ -123,28 +124,28 @@
 		});
 	});
 
-	// $: {
-	// 	messages.subscribe((newMessages) => {
-	// 		const latest = newMessages[newMessages.length - 1];
-	// 		if (latest) {
-	// 			const point = transform([latest.longitude, latest.latitude], 'EPSG:4326', 'EPSG:3857');
-	// 			const pointFeature = new Feature(new Point(point));
+	$: {
+		messages.subscribe((newMessages) => {
+			const latest = newMessages[newMessages.length - 1];
+			if (latest) {
+				const point = transform([latest.longitude, latest.latitude], 'EPSG:4326', 'EPSG:3857');
+				const pointFeature = new Feature(new Point(point));
 
-	// 			const circleStyle = new Style({
-	// 				image: new Circle({
-	// 					radius: 5,
-	// 					fill: new Fill({
-	// 						color: 'red'
-	// 					})
-	// 				})
-	// 			});
+				const circleStyle = new Style({
+					image: new Circle({
+						radius: 5,
+						fill: new Fill({
+							color: 'red'
+						})
+					})
+				});
 
-	// 			pointFeature.setStyle(circleStyle);
-	// 			vectorSource.addFeature(pointFeature);
-	// 			vectorSource.changed();
-	// 		}
-	// 	});
-	// }
+				pointFeature.setStyle(circleStyle);
+				vectorSource.addFeature(pointFeature);
+				vectorSource.changed();
+			}
+		});
+	}
 </script>
 
 <div id="map" class="map"></div>

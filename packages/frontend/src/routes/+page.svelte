@@ -19,15 +19,13 @@
 		resetForm: false,
 		multipleSubmits: data.stage === 'prod' ? 'prevent' : 'allow',
 		onSubmit: ({ formData, cancel }) => {
-			console.log(formData);
-			console.log('submit');
-			console.log($waypoints);
-			// streamIot({
-			// 	duration: formData.get('duration'),
-			// 	speed: formData.get('speed'),
-			// 	sessionId: data.sessionId,
-			// 	service: 'drone'
-			// });
+			streamIot({
+				waypoints: $waypoints,
+				duration: formData.get('duration'),
+				speed: formData.get('speed'),
+				sessionId: data.sessionId,
+				service: 'drone'
+			});
 			cancel();
 		}
 	});
@@ -36,43 +34,42 @@
 
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 
-	// if (browser) {
-	// 	// const client = createConnection(data.endpoint, data.authorizer);
-	// 	const mqttConnection = MqttConnection.getInstance();
-	// 	mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
-	// 	const client = mqttConnection.getClient();
-	// 	client.on('connect', () => {
-	// 		try {
-	// 			client.subscribe(topic, { qos: 1 });
-	// 			console.log('connected to MQTT');
-	// 		} catch (e) {
-	// 			console.log(e);
-	// 		}
-	// 	});
-	// 	client.on('message', (_fullTopic, payload) => {
-	// 		let msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
-	// 		const telemetryData: DroneTelemetryData = JSON.parse(msg);
-	// 		if (payload.dup) {
-	// 			console.log(`Received late message: ${msg}`);
-	// 		} else {
-	// 			messages.update((oldMessages) => [...oldMessages, telemetryData]);
-	// 		}
-	// 	});
-	// 	client.on('error', (error) => {
-	// 		console.error('Error connecting to MQTT broker:', error);
-	// 	});
-	// 	client.on('offline', () => {
-	// 		console.log('Offline from MQTT broker');
-	// 	});
-	// 	client.on('close', () => {
-	// 		console.log('Disconnected from MQTT broker');
-	// 	});
-	// 	client.connect();
+	if (browser) {
+		const mqttConnection = MqttConnection.getInstance();
+		mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
+		const client = mqttConnection.getClient();
+		client.on('connect', () => {
+			try {
+				client.subscribe(topic, { qos: 1 });
+				console.log('connected to MQTT');
+			} catch (e) {
+				console.log(e);
+			}
+		});
+		client.on('message', (_fullTopic, payload) => {
+			let msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
+			const telemetryData: DroneTelemetryData = JSON.parse(msg);
+			if (payload.dup) {
+				console.log(`Received late message: ${msg}`);
+			} else {
+				messages.update((oldMessages) => [...oldMessages, telemetryData]);
+			}
+		});
+		client.on('error', (error) => {
+			console.error('Error connecting to MQTT broker:', error);
+		});
+		client.on('offline', () => {
+			console.log('Offline from MQTT broker');
+		});
+		client.on('close', () => {
+			console.log('Disconnected from MQTT broker');
+		});
+		client.connect();
 
-	// 	window.addEventListener('beforeunload', () => {
-	// 		mqttConnection.disconnect();
-	// 	});
-	// }
+		window.addEventListener('beforeunload', () => {
+			mqttConnection.disconnect();
+		});
+	}
 
 	// streamIot.js
 	export async function streamIot(props) {

@@ -23,8 +23,7 @@ class MqttConnection {
 			username: '', // Must be empty
 			password: token,
 			clientId: sessionId,
-			clean: false,
-			keepalive: 120
+			clean: true
 		});
 	}
 

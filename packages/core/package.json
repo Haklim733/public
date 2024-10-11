@@ -16,6 +16,7 @@
 		"src/**/*"
 	],
 	"dependencies": {
+		"geolib": "^3.3.4",
 		"sst": "3.1.63"
 	}
 }
