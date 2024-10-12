@@ -10,6 +10,7 @@
 	import type { DroneTelemetryData, TelemetryResults } from '@mockiot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
+	import { Card } from '$lib/components/ui/card/index';
 	import * as Form from '$lib/components/ui/form';
 	import { z } from 'zod';
 
@@ -52,7 +53,6 @@
 			iotFormSchema.safeParse(dataToSend);
 			res = streamIot(dataToSend);
 			console.log(res);
-			console.log('onSubmit');
 			cancel();
 		}
 	});
@@ -216,11 +216,12 @@
 		</div>
 		<div class="results">
 			{#if res}
-				{#await res}
-					<p>Loading...</p>
-				{:then res}
-					<p>Total Time: {res.totalTime}</p>
-					<p>Total Distance: {res.totalDistance}</p>
+				{#await res then res}
+					<Card>
+						<h2>Flight Summary</h2>
+						<p>Total Time: {res.totalTime.toFixed(1)} seconds</p>
+						<p>Total Distance: {res.totalDistance} meters</p>
+					</Card>
 				{:catch error}
 					<p>Error: {error.message}</p>
 				{/await}
@@ -265,9 +266,11 @@
 		grid-column: 1;
 		grid-row: 2;
 		padding: 20px;
-		overflow-y: scroll;
-		height: 20%;
+		overflow-y: auto;
+		overflow-x: scroll;
+		height: 100%;
 		display: block;
+		flex-grow: 1;
 	}
 	.map {
 		position: relative;
@@ -278,8 +281,10 @@
 		grid-column: 2;
 		grid-row: 1;
 		padding: 20px;
-		height: 50%;
+		height: 100%;
 		width: 100%;
+		max-width: 100%;
+		max-height: 100%;
 		align-items: center;
 	}
 	.right-bottom-container {
@@ -296,8 +301,6 @@
 		overflow-wrap: break-word;
 		word-wrap: break-word;
 		hyphens: auto;
-		max-width: 100%;
-		width: 100%;
 		text-align: justify;
 		padding: 10px;
 		border-bottom: 1px solid #ccc;
