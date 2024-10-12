@@ -13,8 +13,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { z } from 'zod';
 
-	let idleTime = 0; // Time user has been idle
-	let idleLimit = 5 * 60 * 1000; // x minutes (5 minutes in milliseconds)
+	let idleLimit = 1 * 60 * 1000; // x minutes
 	let idleTimeout;
 
 	const waypointSchema = z.object({
@@ -29,7 +28,7 @@
 
 	export const iotFormSchema = z.object({
 		waypoints: waypointsSchema,
-		speed: z.number().min(10).max(100),
+		speed: z.number().min(5).max(100),
 		sessionId: z.string(),
 		service: z.string()
 	});
@@ -64,26 +63,26 @@
 			trackUserActivity();
 		});
 
-		// Function to reset the idle timer whenever there is user activity
-		function resetIdleTimer() {
-			clearTimeout(idleTimeout); // Clear the previous timeout
-			startIdleTimer(); // Start a new idle timer
-		}
+		// function resetIdleTimer() {
+		// 	clearTimeout(idleTimeout); // Clear the previous timeout
+		// 	startIdleTimer(); // Start a new idle timer
+		// }
 
 		// Initialize and track user activity
 		function trackUserActivity() {
-			window.addEventListener('mousemove', resetIdleTimer);
-			window.addEventListener('keydown', resetIdleTimer);
-			window.addEventListener('touchstart', resetIdleTimer);
-			window.addEventListener('scroll', resetIdleTimer);
+			// window.addEventListener('mousemove', resetIdleTimer);
+			// window.addEventListener('keydown', resetIdleTimer);
+			// window.addEventListener('touchstart', resetIdleTimer);
+			// window.addEventListener('scroll', resetIdleTimer);
 
-			startIdleTimer(); // Start the initial timer
+			// startIdleTimer(); // Start the initial timer
+			console.log('startIdleTimer');
 		}
 
 		function startIdleTimer() {
 			idleTimeout = setTimeout(() => {
 				mqttConnection.disconnect();
-				mqttConnection.close();
+				console.log('idle too long, disconnected');
 			}, idleLimit);
 		}
 		const mqttConnection = MqttConnection.getInstance();
@@ -91,7 +90,7 @@
 		const client = mqttConnection.getClient();
 		client.on('connect', () => {
 			try {
-				client.subscribe(topic, { qos: 1 });
+				client.subscribe(topic, { qos: 0 });
 				console.log('connected to MQTT');
 			} catch (e) {
 				console.log(e);
@@ -108,6 +107,7 @@
 		});
 		client.on('error', (error) => {
 			console.error('Error connecting to MQTT broker:', error);
+			client.end();
 		});
 		client.on('offline', () => {
 			console.log('Offline from MQTT broker');
@@ -120,13 +120,18 @@
 		window.addEventListener('beforeunload', () => {
 			mqttConnection.disconnect();
 		});
+		window.addEventListener('popstate', () => {
+			mqttConnection.disconnect();
+		});
 
 		onDestroy(() => {
-			window.removeEventListener('mousemove', resetIdleTimer);
-			window.removeEventListener('keydown', resetIdleTimer);
-			window.removeEventListener('touchstart', resetIdleTimer);
-			window.removeEventListener('scroll', resetIdleTimer);
-			clearTimeout(idleTimeout); // Clear the idle timer
+			// window.removeEventListener('mousemove', resetIdleTimer);
+			// window.removeEventListener('keydown', resetIdleTimer);
+			// window.removeEventListener('touchstart', resetIdleTimer);
+			// window.removeEventListener('scroll', resetIdleTimer);
+			// clearTimeout(idleTimeout); // Clear the idle timer
+			console.log('OnDestroy');
+			// mqttConnection.disconnect();
 		});
 	}
 
@@ -207,7 +212,9 @@
 		{/each}
 	</div> -->
 	<div class="right-top-container">
-		<Map bind:this={mapComponent}>on:click={setCoordinates}</Map>
+		<div id="map" class="map">
+			<Map bind:this={mapComponent} on:click={setCoordinates} />
+		</div>
 	</div>
 	<div class="right-bottom-container"></div>
 </div>
@@ -239,6 +246,11 @@
 		overflow-y: scroll;
 		height: 20%;
 		display: block;
+	}
+	.map {
+		position: relative;
+		width: 100%;
+		height: 100vh;
 	}
 	.right-top-container {
 		grid-column: 2;

@@ -148,12 +148,4 @@
 	}
 </script>
 
-<div id="map" class="map"></div>
-
-<style>
-	.map {
-		position: relative;
-		width: 100%;
-		height: 100vh;
-	}
-</style>
+<map />

@@ -30,7 +30,6 @@ export async function genDroneTelemetry(
 	duration: number, // in seconds
 	speed: number,
 	altitude: number,
-	signalTime: number,
 	push: boolean = false,
 	topic: string
 ): Promise<void> {
@@ -38,7 +37,7 @@ export async function genDroneTelemetry(
 	let data: DroneTelemetryData[] = [];
 	let currentTimestamp;
 	waypoints.unshift(startLocation);
-	const paths = calculatePath(waypoints, speed, signalTime);
+	const paths = calculatePath(waypoints, speed);
 
 	if (waypoints.length === 0) {
 		throw new Error('Waypoints array cannot be empty');
@@ -127,11 +126,7 @@ function getRandomInt(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export const calculatePath = (
-	waypoints: PathPoint[],
-	droneSpeed: number,
-	signalTime: number
-): PathPoint[] => {
+export const calculatePath = (waypoints: PathPoint[], droneSpeed: number): PathPoint[] => {
 	const path = [];
 	for (let i = 0; i < waypoints.length - 1; i++) {
 		const currentWaypoint = waypoints[i];
@@ -139,7 +134,7 @@ export const calculatePath = (
 		const distance = geolib.getDistance(currentWaypoint, nextWaypoint);
 		const bearing = geolib.getRhumbLineBearing(currentWaypoint, nextWaypoint);
 		const duration = distance / droneSpeed;
-		const numPoints = Math.ceil(duration / signalTime);
+		const numPoints = Math.ceil(duration);
 		for (let j = 0; j < numPoints; j++) {
 			const point = geolib.computeDestinationPoint(currentWaypoint, j * droneSpeed, bearing);
 			path.push(point);

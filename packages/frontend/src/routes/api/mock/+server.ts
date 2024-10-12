@@ -25,7 +25,6 @@ export async function POST({ request }: RequestEvent) {
 			duration,
 			speed,
 			altitude,
-			signalTime,
 			true,
 			topic
 		);

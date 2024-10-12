@@ -24,6 +24,7 @@ class MqttConnection {
 			password: token,
 			clientId: sessionId,
 			clean: true
+			// reconnectPeriod: 5000
 		});
 	}
 
@@ -33,7 +34,7 @@ class MqttConnection {
 
 	public disconnect(): void {
 		if (this.client) {
-			this.client.disconnect();
+			this.client.end();
 		}
 	}
 }
