@@ -139,7 +139,7 @@ export const calculatePath = (waypoints: PathPoint[], droneSpeed: number): PathP
 			const point = geolib.computeDestinationPoint(currentWaypoint, j * droneSpeed, bearing);
 			path.push(point);
 		}
-		path.push(nextWaypoint); //assumes first currentWayPoint is starting location
+		// path.push(nextWaypoint); //assumes first currentWayPoint is starting location
 	}
 	return path;
 };

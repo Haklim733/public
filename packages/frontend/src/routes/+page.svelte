@@ -63,10 +63,10 @@
 			trackUserActivity();
 		});
 
-		// function resetIdleTimer() {
-		// 	clearTimeout(idleTimeout); // Clear the previous timeout
-		// 	startIdleTimer(); // Start a new idle timer
-		// }
+		function resetIdleTimer() {
+			clearTimeout(idleTimeout); // Clear the previous timeout
+			startIdleTimer(); // Start a new idle timer
+		}
 
 		// Initialize and track user activity
 		function trackUserActivity() {
@@ -74,9 +74,8 @@
 			// window.addEventListener('keydown', resetIdleTimer);
 			// window.addEventListener('touchstart', resetIdleTimer);
 			// window.addEventListener('scroll', resetIdleTimer);
-
 			// startIdleTimer(); // Start the initial timer
-			console.log('startIdleTimer');
+			// console.log('startIdleTimer');
 		}
 
 		function startIdleTimer() {
@@ -90,7 +89,7 @@
 		const client = mqttConnection.getClient();
 		client.on('connect', () => {
 			try {
-				client.subscribe(topic, { qos: 0 });
+				client.subscribe(topic, { qos: 1 }); // set to 1 works; 0 does not
 				console.log('connected to MQTT');
 			} catch (e) {
 				console.log(e);
@@ -130,7 +129,7 @@
 			// window.removeEventListener('touchstart', resetIdleTimer);
 			// window.removeEventListener('scroll', resetIdleTimer);
 			// clearTimeout(idleTimeout); // Clear the idle timer
-			console.log('OnDestroy');
+			// console.log('OnDestroy');
 			// mqttConnection.disconnect();
 		});
 	}
@@ -175,16 +174,16 @@
 
 <div class="App">
 	<div class="left-top-container">
-		<h1>Test Iot Telemetry</h1>
+		<h1>Test Drone Telemetry</h1>
 		<SuperDebug data={$formData} />
 		<form method="POST" use:enhance>
 			<Form.Field {form} name="speed">
 				<Form.Control let:attrs>
 					<Form.Label>Speed</Form.Label>
-					<Input {...attrs} bind:value={$formData.speed} />
+					<Input {...attrs} bind:value={$formData.speed} type="number" min="5" max="60" />
 				</Form.Control>
 				<Form.Description>This is the speed of the drone (m/s)</Form.Description>
-				<Form.Description>*max duration of flight is limited to 15 seconds</Form.Description>
+				<Form.Description>*max duration of flight is limited to 20 seconds</Form.Description>
 				<Form.FieldErrors />
 			</Form.Field>
 			<Form.Button>Submit</Form.Button>
