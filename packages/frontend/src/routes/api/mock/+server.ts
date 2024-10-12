@@ -14,10 +14,9 @@ export async function POST({ request }: RequestEvent) {
 		const startLocation = { latitude: latitude, longitude: longitude, altitude: 346 };
 		const altitude = 15;
 		const duration = 20;
-		const device = 'drone';
+		const device = service;
 		topic = `${Resource.App.name}/${Resource.App.stage}/iot/${sessionId}`;
-		console.log(waypoints);
-		await genDroneTelemetry(
+		const res = await genDroneTelemetry(
 			device,
 			waypoints,
 			startLocation,
@@ -27,9 +26,15 @@ export async function POST({ request }: RequestEvent) {
 			true,
 			topic
 		);
+		return new Response(JSON.stringify({ message: 'success', data: res }), {
+			status: 200,
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
 	}
 
-	return new Response(JSON.stringify({ message: 'success' }), {
+	return new Response(JSON.stringify({ message: 'no such service', time: '' }), {
 		status: 200,
 		headers: {
 			'Content-Type': 'application/json'

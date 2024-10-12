@@ -7,7 +7,7 @@
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
 	import MqttConnection from '$lib/connect';
-	import type { DroneTelemetryData } from '@mockiot/core/src/drone';
+	import type { DroneTelemetryData, TelemetryResults } from '@mockiot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import * as Form from '$lib/components/ui/form';
@@ -34,6 +34,7 @@
 	});
 
 	export let data: PageData;
+	let res: Promise<TelemetryResults>;
 
 	const form = superForm(data.form, {
 		applyAction: true,
@@ -49,10 +50,27 @@
 			};
 			console.log(JSON.stringify(dataToSend));
 			iotFormSchema.safeParse(dataToSend);
-			streamIot(dataToSend);
+			res = streamIot(dataToSend);
+			console.log(res);
+			console.log('onSubmit');
 			cancel();
 		}
 	});
+
+	export async function streamIot(props): Promise<TelemetryResults> {
+		const res = await fetch(data.publishEndpoint, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(props)
+		});
+		if (!res.ok) {
+			throw new Error('Network response was not ok');
+		}
+		const fetchedData = await res.json();
+		return fetchedData.data;
+	}
 
 	const { form: formData, enhance } = form;
 
@@ -64,11 +82,10 @@
 		});
 
 		function resetIdleTimer() {
-			clearTimeout(idleTimeout); // Clear the previous timeout
-			startIdleTimer(); // Start a new idle timer
+			// clearTimeout(idleTimeout);
+			startIdleTimer();
 		}
 
-		// Initialize and track user activity
 		function trackUserActivity() {
 			// window.addEventListener('mousemove', resetIdleTimer);
 			// window.addEventListener('keydown', resetIdleTimer);
@@ -134,19 +151,6 @@
 		});
 	}
 
-	// streamIot.js
-	export async function streamIot(props) {
-		const res = await fetch(data.publishEndpoint, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(props)
-		});
-
-		return await res.json();
-	}
-
 	let mapComponent;
 	let vizComponent;
 
@@ -174,13 +178,20 @@
 
 <div class="App">
 	<div class="left-top-container">
-		<h1>Test Drone Telemetry</h1>
+		<h1>Test Drone Flight Telemetry with MQTT</h1>
 		<SuperDebug data={$formData} />
 		<form method="POST" use:enhance>
 			<Form.Field {form} name="speed">
 				<Form.Control let:attrs>
 					<Form.Label>Speed</Form.Label>
-					<Input {...attrs} bind:value={$formData.speed} type="number" min="5" max="60" />
+					<Input
+						{...attrs}
+						bind:value={$formData.speed}
+						type="number"
+						min="5"
+						max="60"
+						class="width:50%;height:30%;"
+					/>
 				</Form.Control>
 				<Form.Description>This is the speed of the drone (m/s)</Form.Description>
 				<Form.Description>*max duration of flight is limited to 20 seconds</Form.Description>
@@ -203,13 +214,25 @@
 				Clear
 			</Button>
 		</div>
+		<div class="results">
+			{#if res}
+				{#await res}
+					<p>Loading...</p>
+				{:then res}
+					<p>Total Time: {res.totalTime}</p>
+					<p>Total Distance: {res.totalDistance}</p>
+				{:catch error}
+					<p>Error: {error.message}</p>
+				{/await}
+			{/if}
+		</div>
 	</div>
-	<!-- <div class="left-bottom-container">
+	<div class="left-bottom-container">
 		<h2>Streamed Data</h2>
 		{#each $messages as item}
 			<div class="message">{JSON.stringify(item)}</div>
 		{/each}
-	</div> -->
+	</div>
 	<div class="right-top-container">
 		<div id="map" class="map">
 			<Map bind:this={mapComponent} on:click={setCoordinates} />
@@ -255,7 +278,7 @@
 		grid-column: 2;
 		grid-row: 1;
 		padding: 20px;
-		height: 100%;
+		height: 50%;
 		width: 100%;
 		align-items: center;
 	}
@@ -263,7 +286,7 @@
 		grid-column: 2;
 		grid-row: 2;
 		padding: 20px;
-		height: 100%;
+		height: 50%;
 		width: 100%;
 		align-items: center;
 	}

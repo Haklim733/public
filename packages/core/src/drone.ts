@@ -23,6 +23,16 @@ interface PathPoint {
 	longitude: number;
 }
 
+interface PathResults {
+	paths: PathPoint[];
+	totalDistance: number;
+}
+
+export interface TelemetryResults {
+	totalDistance: number;
+	totalTime: number;
+}
+
 export async function genDroneTelemetry(
 	device: string,
 	waypoints: PathPoint[],
@@ -32,12 +42,12 @@ export async function genDroneTelemetry(
 	altitude: number,
 	push: boolean = false,
 	topic: string
-): Promise<void> {
+): Promise<TelemetryResults> {
 	let timeElapsed = 0;
 	let data: DroneTelemetryData[] = [];
 	let currentTimestamp;
 	waypoints.unshift(startLocation);
-	const paths = calculatePath(waypoints, speed);
+	const { paths, totalDistance } = calculatePath(waypoints, speed);
 
 	if (waypoints.length === 0) {
 		throw new Error('Waypoints array cannot be empty');
@@ -118,6 +128,8 @@ export async function genDroneTelemetry(
 		// }
 	}
 	console.log('finished sending telemetry');
+	console.log(totalTime);
+	return { totalTime: totalTime, totalDistance: totalDistance };
 }
 
 function getRandomInt(min: number, max: number) {
@@ -126,12 +138,14 @@ function getRandomInt(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export const calculatePath = (waypoints: PathPoint[], droneSpeed: number): PathPoint[] => {
+export const calculatePath = (waypoints: PathPoint[], droneSpeed: number): PathResults => {
 	const path = [];
+	let totalDistance = 0;
 	for (let i = 0; i < waypoints.length - 1; i++) {
 		const currentWaypoint = waypoints[i];
 		const nextWaypoint = waypoints[i + 1];
 		const distance = geolib.getDistance(currentWaypoint, nextWaypoint);
+		totalDistance += distance;
 		const bearing = geolib.getRhumbLineBearing(currentWaypoint, nextWaypoint);
 		const duration = distance / droneSpeed;
 		const numPoints = Math.ceil(duration);
@@ -139,7 +153,7 @@ export const calculatePath = (waypoints: PathPoint[], droneSpeed: number): PathP
 			const point = geolib.computeDestinationPoint(currentWaypoint, j * droneSpeed, bearing);
 			path.push(point);
 		}
-		// path.push(nextWaypoint); //assumes first currentWayPoint is starting location
+		path.push(nextWaypoint); //assumes first currentWayPoint is starting location
 	}
-	return path;
+	return { paths: path, totalDistance: totalDistance };
 };
