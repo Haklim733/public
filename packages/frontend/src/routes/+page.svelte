@@ -15,26 +15,10 @@
 	import { Card } from '$lib/components/ui/card/index';
 	import * as Form from '$lib/components/ui/form';
 	import { z } from 'zod';
+	import { iotFormSchema } from '@mockIot/core/src/schema';
 
 	let idleLimit = 1 * 60 * 1000; // x minutes
 	let idleTimeout;
-
-	const waypointSchema = z.object({
-		latitude: z.number(),
-		longitude: z.number()
-	});
-
-	const waypointsSchema = z
-		.array(waypointSchema)
-		.min(1, 'Waypoints cannot be empty')
-		.max(10, 'Too many waypoints');
-
-	export const iotFormSchema = z.object({
-		waypoints: waypointsSchema,
-		speed: z.number().min(5).max(100),
-		sessionId: z.string(),
-		service: z.string()
-	});
 
 	export let data: PageData;
 	let res: Promise<TelemetryResults>;
