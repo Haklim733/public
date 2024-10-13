@@ -3,7 +3,7 @@
 export default $config({
 	app(input) {
 		return {
-			name: 'mockIot',
+			name: 'viziot',
 			removal: input.stage === 'production' ? 'retain' : 'remove',
 			home: 'aws',
 			region: 'us-west-1'

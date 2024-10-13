@@ -1,6 +1,6 @@
 import { message, superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
-import { iotFormSchema } from '@mockIot/core/src/iot.types';
+import { iotFormSchema } from '@viziot/core/src/iot.types';
 import { zod } from 'sveltekit-superforms/adapters';
 import { Resource } from 'sst';
 

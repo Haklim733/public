@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Table from '$lib/components/ui/table';
-	import type { DroneTelemetry } from '@mockiot/core/src/drone';
+	import type { DroneTelemetry } from '@viziot/core/src/drone';
 
 	export let telemetryData: DroneTelemetry[] = [];
 </script>

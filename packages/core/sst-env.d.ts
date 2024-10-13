@@ -5,18 +5,9 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
-    "IotServer": {
-      "authorizer": string
-      "endpoint": string
-      "type": "sst.aws.Realtime"
-    }
-    "MockIotSite": {
-      "type": "sst.aws.SvelteKit"
-      "url": string
-    }
     "RT_TOKEN": {
       "type": "sst.sst.Secret"
-      "value": string
+      "value": any
     }
   }
 }

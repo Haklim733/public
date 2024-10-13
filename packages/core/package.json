@@ -1,5 +1,5 @@
 {
-	"name": "@mockiot/core",
+	"name": "@viziot/core",
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {

@@ -1,4 +1,4 @@
-export const stream = new sst.aws.KinesisStream('mockIotStream');
+export const stream = new sst.aws.KinesisStream('VizIotStream');
 
 stream.subscribe('./packages/core/src/subscriber.filtered', {
 	filters: [

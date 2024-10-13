@@ -1,4 +1,4 @@
-import { generateARVisionData } from '@mockIot/core/src/ar';
+import { generateARVisionData } from '@viziot/core/src/ar';
 import { Resource } from 'sst';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
 import mqtt from 'mqtt';
@@ -10,7 +10,7 @@ test('test publish mqt', async () => {
 
 	topic = `${Resource.App.name}/${Resource.App.stage}/iot/test`;
 	console.log(topic);
-	const payload = generateARVisionData(`mockIot-test`);
+	const payload = generateARVisionData(`VizIot-test`);
 	// client!.publish(topic, JSON.stringify(payload));
 	let res = await iotClient.send(
 		new PublishCommand({

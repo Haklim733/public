@@ -9,13 +9,13 @@
 	// import MyChart from '$lib/components/TsChart.svelte';
 	import DroneTable from '$lib/components/DroneTable.svelte';
 	import MqttConnection from '$lib/connect';
-	import type { DroneTelemetryData, TelemetryResults } from '@mockiot/core/src/drone';
+	import type { DroneTelemetryData, TelemetryResults } from '@viziot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import { Card } from '$lib/components/ui/card/index';
 	import * as Form from '$lib/components/ui/form';
 	import { z } from 'zod';
-	import { iotFormSchema } from '@mockIot/core/src/schema';
+	import { iotFormSchema } from '@viziot/core/src/schema';
 
 	let idleLimit = 1 * 60 * 1000; // x minutes
 	let idleTimeout;
