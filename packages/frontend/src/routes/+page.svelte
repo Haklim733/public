@@ -206,7 +206,7 @@
 				{#await res then res}
 					<Card>
 						<h2>Flight Summary</h2>
-						<p>Total Time: {res.totalTime.toFixed(1)} seconds</p>
+						<!-- <p>Total Time: {res.totalTime.toFixed(1)} seconds</p> -->
 						<p>Total Distance: {res.totalDistance} meters</p>
 					</Card>
 				{:catch error}

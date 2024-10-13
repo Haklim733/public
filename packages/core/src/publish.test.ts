@@ -1,7 +1,7 @@
 import { generateARVisionData } from '@viziot/core/src/ar';
 import { Resource } from 'sst';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
-import mqtt from 'mqtt';
+import { test } from 'bun:test';
 
 const iotClient = new IoTDataPlaneClient({});
 
