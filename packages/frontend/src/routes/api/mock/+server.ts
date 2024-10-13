@@ -1,17 +1,20 @@
 import { genDroneTelemetry } from '@mockIot/core/src/drone';
 import { Resource } from 'sst';
 import type { RequestEvent } from '@sveltejs/kit';
+import { mapStartLoc } from '$lib/utils';
 
 export async function POST({ request }: RequestEvent) {
 	const { waypoints, sessionId, service, speed } = await request.json();
 
 	let topic = '';
 	console.log(`smock/+server.ts: ${service}, ${sessionId}`);
-	let longitude = -118.30049006438229;
-	let latitude = 34.11844295532757;
 
 	if (service === 'drone') {
-		const startLocation = { latitude: latitude, longitude: longitude, altitude: 346 };
+		const startLocation = {
+			latitude: mapStartLoc.latitude,
+			longitude: mapStartLoc.longitude,
+			altitude: 346
+		};
 		const altitude = 15;
 		const duration = 20;
 		const device = service;

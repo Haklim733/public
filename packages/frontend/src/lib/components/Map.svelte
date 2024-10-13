@@ -11,6 +11,7 @@
 	import { Point } from 'ol/geom';
 
 	import { messages, waypoints } from '$lib/store';
+	import { mapStartLoc } from '$lib/utils';
 
 	const tileCache = {};
 
@@ -32,9 +33,11 @@
 	let vectorLayer;
 	let vectorSource;
 	const zoom = 19;
-	let startingX = -118.30049006438229;
-	let startingY = 34.11844295532757;
-	let startLocation = transform([startingX, startingY], 'EPSG:4326', 'EPSG:3857');
+	let startLocation = transform(
+		[mapStartLoc.longitude, mapStartLoc.latitude],
+		'EPSG:4326',
+		'EPSG:3857'
+	);
 	let startFeature = new Feature(new Point(startLocation));
 
 	//draw layer

@@ -6,7 +6,7 @@
 	import { messages, waypoints } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
-	import MyChart from '$lib/components/TsChart.svelte';
+	// import MyChart from '$lib/components/TsChart.svelte';
 	import DroneTable from '$lib/components/DroneTable.svelte';
 	import MqttConnection from '$lib/connect';
 	import type { DroneTelemetryData, TelemetryResults } from '@mockiot/core/src/drone';
