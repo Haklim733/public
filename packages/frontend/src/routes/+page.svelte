@@ -242,9 +242,6 @@
 			<Map bind:this={mapComponent} on:click={setCoordinates} />
 		</div>
 	</div>
-	<div class="right-bottom-container">
-		<MyChart></MyChart>
-	</div>
 </div>
 
 <style>
