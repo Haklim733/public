@@ -1,52 +1,14 @@
-# How to create a Svelte app
+# Overview
 
-An example full-stack serverless Svelte app created with SST.
+This is a simple side project to simulate and visualize drone pathing on a map. Currently, this is limited to simple geocoordinates and speed but does not factor in altitude, acceleration, etc.
 
-## Getting Started
+# Requirements
 
-[**Read the tutorial**](https://sst.dev/examples/how-to-create-a-svelte-app-with-serverless.html)
+THis package utilizes sst dev and aws. You will need set up an aws account.
+This package also utilizes the aws iot core mqtt broker which relies on a lambda function for authorization. This has been commented out but can be implemented by setting the RT_TOKEN token using `bun sst secret`.
 
-Install the example.
+The cost to run this is non-zero but minimal, depending on your usage.
 
-```bash
-$ npx create-sst@latest --template=examples/svelte-app
-# Or with Yarn
-$ yarn create sst --template=examples/svelte-app
-# Or with PNPM
-$ pnpm create sst --template=examples/svelte-app
-```
+# Local Dev
 
-## Commands
-
-### `yarn run start`
-
-Starts the local Lambda development environment.
-
-### `yarn run build`
-
-Build your app and synthesize your stacks.
-
-Generates a `.build/` directory with the compiled files and a `.build/cdk.out/` directory with the synthesized CloudFormation stacks.
-
-### `yarn run deploy [stack]`
-
-Deploy all your stacks to AWS. Or optionally deploy, a specific stack.
-
-### `yarn run remove [stack]`
-
-Remove all your stacks and all of their resources from AWS. Or optionally removes, a specific stack.
-
-### `yarn run test`
-
-Runs your tests using Jest. Takes all the [Jest CLI options](https://jestjs.io/docs/en/cli).
-
-## Documentation
-
-Learn more about SST.
-
-- [Docs](https://docs.sst.dev)
-- [sst](https://docs.sst.dev/packages/sst)
-
-## Community
-
-[Follow us on Twitter](https://twitter.com/sst_dev) or [post on our forums](https://discourse.sst.dev).
+bun install && bun sst dev
