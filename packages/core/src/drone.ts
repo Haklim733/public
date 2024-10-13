@@ -2,7 +2,7 @@ import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-pla
 import geolib from 'geolib';
 
 const iotClient = new IoTDataPlaneClient({});
-export interface DroneTelemetryData {
+export interface DroneTelemetry {
 	device: string;
 	timestamp: number;
 	latitude: number;
@@ -44,7 +44,7 @@ export async function genDroneTelemetry(
 	topic: string
 ): Promise<TelemetryResults> {
 	let timeElapsed = 0;
-	let data: DroneTelemetryData[] = [];
+	let data: DroneTelemetry[] = [];
 	let currentTimestamp;
 	waypoints.unshift(startLocation);
 	const { paths, totalDistance } = calculatePath(waypoints, speed);
@@ -93,7 +93,7 @@ export async function genDroneTelemetry(
 		// 	lastDistanceToWaypoint = distanceToWaypoint;
 		// 	console.log(`distance to waypoint ${JSON.stringify(waypoint)}: ${distanceToWaypoint}`);
 
-		const telemetryData: DroneTelemetryData = {
+		const telemetryData: DroneTelemetry = {
 			device,
 			timestamp: currentTimestamp,
 			latitude: path.latitude,

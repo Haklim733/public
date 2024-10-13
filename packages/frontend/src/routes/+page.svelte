@@ -6,6 +6,8 @@
 	import { messages, waypoints } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
+	import MyChart from '$lib/components/TsChart.svelte';
+	import DroneTable from '$lib/components/DroneTable.svelte';
 	import MqttConnection from '$lib/connect';
 	import type { DroneTelemetryData, TelemetryResults } from '@mockiot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
@@ -181,7 +183,7 @@
 		<h1>Test Drone Flight Telemetry with MQTT</h1>
 		<SuperDebug data={$formData} />
 		<form method="POST" use:enhance>
-			<Form.Field {form} name="speed">
+			<Form.Field {form} name="speed" class="width:50%;">
 				<Form.Control let:attrs>
 					<Form.Label>Speed</Form.Label>
 					<Input
@@ -190,7 +192,7 @@
 						type="number"
 						min="5"
 						max="60"
-						class="width:50%;height:30%;"
+						placeholder="Enter 5-60"
 					/>
 				</Form.Control>
 				<Form.Description>This is the speed of the drone (m/s)</Form.Description>
@@ -209,6 +211,7 @@
 					clearMap();
 					clearViz();
 					waypoints.set([]);
+					res = undefined;
 				}}
 			>
 				Clear
@@ -229,17 +232,19 @@
 		</div>
 	</div>
 	<div class="left-bottom-container">
-		<h2>Streamed Data</h2>
-		{#each $messages as item}
-			<div class="message">{JSON.stringify(item)}</div>
-		{/each}
+		{#if $messages.length > 0}
+			<h2>Streamed Data</h2>
+			<DroneTable telemetryData={$messages} />
+		{/if}
 	</div>
 	<div class="right-top-container">
 		<div id="map" class="map">
 			<Map bind:this={mapComponent} on:click={setCoordinates} />
 		</div>
 	</div>
-	<div class="right-bottom-container"></div>
+	<div class="right-bottom-container">
+		<MyChart></MyChart>
+	</div>
 </div>
 
 <style>
@@ -250,50 +255,57 @@
 		text-align: center;
 		place-items: center;
 		grid-template-columns: 1fr 1fr;
-		grid-template-rows: auto 1fr;
+		grid-template-rows: 1fr 1fr; /* Adjusted row sizes */
 	}
 	.left-top-container {
 		grid-column: 1;
 		grid-row: 1;
 		display: grid;
-		grid-template-columns: 1fr;
-		gap: 10px;
-		padding: 20px;
+		gap: 1%;
+		padding: 2% 2%;
 		overflow-y: auto;
-		height: '80%';
-	}
-	.left-bottom-container {
-		grid-column: 1;
-		grid-row: 2;
-		padding: 20px;
-		overflow-y: auto;
-		overflow-x: scroll;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		height: 100%;
-		display: block;
-		flex-grow: 1;
-	}
-	.map {
-		position: relative;
-		width: 100%;
-		height: 100vh;
+		width: 80%;
+		max-width: 100%;
 	}
 	.right-top-container {
 		grid-column: 2;
 		grid-row: 1;
-		padding: 20px;
+		gap: 1%;
+		padding: 2% 2%;
 		height: 100%;
 		width: 100%;
 		max-width: 100%;
 		max-height: 100%;
 		align-items: center;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	}
+	.left-bottom-container {
+		grid-column: 1;
+		grid-row: 2;
+		gap: 1%;
+		padding: 2% 4%;
+		overflow-y: scroll;
+		overflow-x: hidden;
+		max-height: 100%;
+		max-width: 100%;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	}
+	.map {
+		position: relative;
+		width: 100%;
+		height: 100%;
 	}
 	.right-bottom-container {
 		grid-column: 2;
 		grid-row: 2;
-		padding: 20px;
-		height: 50%;
+		gap: 1%;
+		padding: 2% 2%;
+		height: 100%;
 		width: 100%;
 		align-items: center;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	}
 
 	.message {
