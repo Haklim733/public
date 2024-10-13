@@ -222,6 +222,7 @@
 		{/if}
 	</div>
 	<div class="right-top-container">
+		<h2>Click on the Map to set Waypoints</h2>
 		<div id="map" class="map">
 			<Map bind:this={mapComponent} on:click={setCoordinates} />
 		</div>
@@ -236,7 +237,7 @@
 		text-align: center;
 		place-items: center;
 		grid-template-columns: 1fr 1fr;
-		grid-template-rows: 1fr 1fr; /* Adjusted row sizes */
+		grid-template-rows: 1fr auto;
 	}
 	.left-top-container {
 		grid-column: 1;
@@ -245,10 +246,11 @@
 		gap: 1%;
 		padding: 2% 2%;
 		overflow-y: auto;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		height: 100%;
 		width: 80%;
 		max-width: 100%;
+		position: sticky;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	}
 	.right-top-container {
 		grid-column: 2;
@@ -260,6 +262,7 @@
 		max-width: 100%;
 		max-height: 100%;
 		align-items: center;
+		position: sticky;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	}
 	.left-bottom-container {
