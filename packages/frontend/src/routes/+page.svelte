@@ -15,12 +15,17 @@
 	import { Card } from '$lib/components/ui/card/index';
 	import * as Form from '$lib/components/ui/form';
 	import { iotFormSchema } from '@viziot/core/src/schema';
+	import { map } from 'zod';
 
 	let idleLimit = 3 * 60 * 1000; // x minutes
 	let idleTimeout;
+	let timedOut = false;
 
 	export let data: PageData;
 	let res: Promise<TelemetryResults>;
+
+	let startLocLong = $startingLocation.longitude;
+	let startLocLat = $startingLocation.latitude;
 
 	const form = superForm(data.droneForm, {
 		applyAction: true,
@@ -96,54 +101,49 @@
 		return client;
 	}
 
+	function resetIdleTimer(client) {
+		clearTimeout(idleTimeout);
+		startIdleTimer(client);
+		if (!client.connected && timedOut) {
+			const client = connectMqtt();
+			client.connect();
+		}
+	}
+	function startIdleTimer(client) {
+		idleTimeout = setTimeout(() => {
+			timedOut = true;
+			client.end();
+			console.log('idle too long, disconnected');
+		}, idleLimit);
+	}
 	if (browser) {
 		onMount(() => {
-			trackUserActivity();
-		});
-
-		const client = connectMqtt();
-		client.connect();
-
-		function trackUserActivity() {
-			window.addEventListener('click', resetIdleTimer);
-			window.removeEventListener('mousemove', resetIdleTimer);
-			window.removeEventListener('touchstart', resetIdleTimer);
-			window.removeEventListener('scroll', resetIdleTimer);
-			startIdleTimer(); // Start the initial timer
-		}
-
-		function resetIdleTimer() {
-			clearTimeout(idleTimeout);
-			startIdleTimer();
-			window.location.reload();
-			// if (!client.connected) {
-			// 	client.reconnect();
-		}
-
-		function startIdleTimer() {
-			idleTimeout = setTimeout(() => {
+			const client = connectMqtt();
+			client.connect();
+			function trackUserActivity(client) {
+				window.addEventListener('click', resetIdleTimer);
+				window.removeEventListener('mousemove', resetIdleTimer);
+				window.removeEventListener('touchstart', resetIdleTimer);
+				window.removeEventListener('scroll', resetIdleTimer);
+				startIdleTimer(client); // Start the initial timer
+			}
+			trackUserActivity(client);
+			window.addEventListener('popstate', (state) => {
+				if (state && window.location.href === window.location.href) {
+					window.location.reload();
+					mapComponent.map.render();
+				}
 				client.end();
-				console.log('idle too long, disconnected');
-			}, idleLimit);
-		}
-		window.addEventListener('beforeunload', () => {
-			client.end();
+			});
 		});
-		window.addEventListener('popstate', () => {
-			client.end();
-		});
+
+		// window.addEventListener('beforeunload', () => {
+		// 	isNavigatingAway = true;
+		// 	client.end();
+		// });
 	}
 
-	onDestroy(() => {
-		if (browser) {
-			window.removeEventListener('mousemove', resetIdleTimer);
-			window.removeEventListener('touchstart', resetIdleTimer);
-			window.removeEventListener('scroll', resetIdleTimer);
-			// clearTimeout(idleTimeout); // Clear the idle timer
-			console.log('OnDestroy');
-			// mqttConnection.disconnect();
-		}
-	});
+	onDestroy(() => {});
 
 	let mapComponent;
 	let vizComponent;
@@ -172,12 +172,6 @@
 			latitude = lat;
 			longitude = lng;
 		}
-	}
-	let startLocLong = $startingLocation.longitude;
-	let startLocLat = $startingLocation.latitude;
-
-	function resetIdleTimer(this: Window, ev: MouseEvent) {
-		throw new Error('Function not implemented.');
 	}
 </script>
 
