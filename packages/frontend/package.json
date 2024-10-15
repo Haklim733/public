@@ -28,9 +28,9 @@
 		"vite": "^5.0.3"
 	},
 	"dependencies": {
-		"@viziot/core": "workspace:*",
 		"@unovis/svelte": "^1.4.3-beta.0",
 		"@unovis/ts": "^1.4.3-beta.0",
+		"@viziot/core": "workspace:*",
 		"bits-ui": "^0.21.16",
 		"clsx": "^2.1.1",
 		"formsnap": "^1.0.1",

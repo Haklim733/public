@@ -14,7 +14,6 @@
 	import { Input } from '$lib/components/ui/input/index';
 	import { Card } from '$lib/components/ui/card/index';
 	import * as Form from '$lib/components/ui/form';
-	import { z } from 'zod';
 	import { iotFormSchema } from '@viziot/core/src/schema';
 
 	let idleLimit = 1 * 60 * 1000; // x minutes
@@ -23,13 +22,14 @@
 	export let data: PageData;
 	let res: Promise<TelemetryResults>;
 
-	const form = superForm(data.form, {
+	const form = superForm(data.droneForm, {
 		applyAction: true,
 		invalidateAll: false,
 		resetForm: false,
 		multipleSubmits: data.stage === 'prod' ? 'prevent' : 'allow',
 		onSubmit: ({ formData, cancel }) => {
 			const dataToSend = {
+				startLocation: { longitude: startLocLong, latitude: startLocLat },
 				waypoints: $waypoints,
 				speed: formData.get('speed'),
 				sessionId: data.sessionId,
@@ -150,6 +150,11 @@
 			vizComponent.clearVizData();
 		}
 	}
+	function changeStart() {
+		if (mapComponent) {
+			mapComponent.updateStartLoc(startLocLong, startLocLat);
+		}
+	}
 	let latitude = 0;
 	let longitude = 0;
 
@@ -160,12 +165,43 @@
 			longitude = lng;
 		}
 	}
+	let startLocLong;
+	let startLocLat;
 </script>
 
 <div class="App">
 	<div class="left-top-container">
 		<h1>Test Drone Flight Telemetry with MQTT</h1>
 		<SuperDebug data={$formData} />
+		<Form.Field {form} name="startLong" class="width:50%;">
+			<Form.Control let:attrs>
+				<Form.Label>Start Location Longitude</Form.Label>
+				<Input
+					{...attrs}
+					bind:value={startLocLong}
+					type="number"
+					min="5"
+					max="60"
+					placeholder="Enter 5-60"
+				/>
+			</Form.Control>
+			<Form.FieldErrors />
+		</Form.Field>
+		<Form.Field {form} name="startLong" class="width:50%;">
+			<Form.Control let:attrs>
+				<Form.Label>Start Location Latitude</Form.Label>
+				<Input
+					{...attrs}
+					bind:value={startLocLat}
+					type="number"
+					min="5"
+					max="60"
+					placeholder="Enter 5-60"
+				/>
+			</Form.Control>
+			<Form.FieldErrors />
+		</Form.Field>
+		<Form.Button on:click={() => changeStart()}>Submit</Form.Button>
 		<form method="POST" use:enhance>
 			<Form.Field {form} name="speed" class="width:50%;">
 				<Form.Control let:attrs>

@@ -1,11 +1,12 @@
-import { message, superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
-import { iotFormSchema } from '@viziot/core/src/schema';
+import { iotFormSchema, startLocSchema } from '@viziot/core/src/schema';
 import { zod } from 'sveltekit-superforms/adapters';
 import { Resource } from 'sst';
 
-export const load = (async ({ fetch, locals }) => {
-	const form = await superValidate(zod(iotFormSchema));
+export const load: PageServerLoad = async ({ locals }) => {
+	const droneForm = await superValidate(zod(iotFormSchema));
+	const startLocForm = await superValidate(zod(startLocSchema));
 	const endpoint = Resource.IotServer.endpoint;
 	const authorizer = Resource.IotServer.authorizer;
 	const token = Resource.RT_TOKEN.value;
@@ -13,7 +14,8 @@ export const load = (async ({ fetch, locals }) => {
 	const stage = Resource.App.stage;
 
 	return {
-		form,
+		droneForm,
+		startLocForm,
 		sessionId: locals.user.sessionId,
 		endpoint: endpoint,
 		authorizer: authorizer,
@@ -22,7 +24,7 @@ export const load = (async ({ fetch, locals }) => {
 		stage: stage,
 		publishEndpoint: '/api/mock'
 	};
-}) satisfies PageServerLoad;
+};
 
 export const actions = {
 	default: async ({}) => {

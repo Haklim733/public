@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { XYZ } from 'ol/source';
 	import { Map, View, Feature } from 'ol';
 	import { Draw } from 'ol/interaction';
@@ -11,10 +11,11 @@
 	import { Point } from 'ol/geom';
 
 	import { messages, waypoints } from '$lib/store';
-	import { mapStartLoc } from '$lib/utils';
 
 	const tileCache = {};
-
+	const vectorSource = new VectorSource({
+		features: []
+	});
 	const tileLayer = new TileLayer({
 		source: new XYZ({
 			url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -28,50 +29,7 @@
 			}
 		})
 	});
-
-	let map;
-	let vectorLayer;
-	let vectorSource;
-	const zoom = 19;
-	let startLocation = transform(
-		[mapStartLoc.longitude, mapStartLoc.latitude],
-		'EPSG:4326',
-		'EPSG:3857'
-	);
-	let startFeature = new Feature(new Point(startLocation));
-
-	//draw layer
-	let draw;
-
-	startFeature.setStyle(
-		new Style({
-			image: new Circle({
-				radius: 4,
-				fill: new Fill({
-					color: 'blue'
-				})
-			}),
-			text: new Text({
-				text: 'Griffith Observatory',
-				font: '14px Calibri,sans-serif',
-				fill: new Fill({
-					color: 'black'
-				}),
-				offsetX: 15,
-				offsetY: -15
-			})
-		})
-	);
-	function clearVectorSource() {
-		vectorSource.clear();
-		vectorSource.addFeature(startFeature);
-		vectorSource.changed();
-	}
-
-	export { clearVectorSource };
-
-	vectorSource = new VectorSource();
-	vectorLayer = new VectorLayer({
+	const vectorLayer = new VectorLayer({
 		source: vectorSource
 	});
 
@@ -83,38 +41,112 @@
 			src: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/><path d="M12 12l-8 8 8 8 8-8z"/></svg>'
 		})
 	});
-	let drawing = false;
 
-	onMount(() => {
-		map = new Map({
-			target: 'map',
-			layers: [
-				new TileLayer({
-					source: new XYZ({
-						url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+	const draw = new Draw({
+		source: vectorSource,
+		type: 'Point',
+		style: crossStyle
+	});
+	let map;
+	let longitude = -118.30049006438229;
+	let latitude = 34.11844295532757;
+	const zoom = 18;
+	let startLocation = transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857');
+	let startFeature = new Feature(new Point(startLocation));
+	startFeature.setStyle(
+		new Style({
+			image: new Circle({
+				radius: 4,
+				fill: new Fill({
+					color: 'blue'
+				})
+			}),
+			text: new Text({
+				text: 'Starting Location',
+				font: '14px Calibri,sans-serif',
+				fill: new Fill({
+					color: 'black'
+				}),
+				offsetX: 15,
+				offsetY: -15
+			})
+		})
+	);
+
+	export function clearVectorSource() {
+		vectorSource.clear();
+		vectorSource.changed();
+		// vectorSource.addFeature(startFeature);
+	}
+
+	export function updateStartLoc(longitude: string, latitude: string) {
+		vectorSource.clear();
+		startLocation = transform(
+			[parseFloat(longitude), parseFloat(latitude)],
+			'EPSG:4326',
+			'EPSG:3857'
+		);
+		console.log('start location is' + startLocation);
+		const point = new Point(startLocation);
+		const newFeature = new Feature(point);
+		newFeature.setStyle(
+			new Style({
+				image: new Circle({
+					radius: 4,
+					fill: new Fill({
+						color: 'blue'
 					})
 				}),
-				vectorLayer
-			],
+				text: new Text({
+					text: 'Starting Location',
+					font: '14px Calibri,sans-serif',
+					fill: new Fill({
+						color: 'black'
+					}),
+					offsetX: 15,
+					offsetY: -15
+				})
+			})
+		);
+		vectorLayer.getSource().refresh();
+		vectorSource.addFeature(newFeature);
+		map.getView().setCenter(startLocation);
+		map.getView().setZoom(17);
+		map.updateSize();
+		map.getView().changed();
+		vectorSource.changed();
+		map.render();
+		map.addInteraction(draw);
+		$waypoints.set([]);
+		map.on('click', (event) => {
+			const coordinates = event.coordinate;
+			const lonLat = toLonLat(coordinates);
+			const latitude = lonLat[1];
+			const longitude = lonLat[0];
+			console.log(lonLat);
+			$waypoints.push({ latitude: latitude, longitude: longitude });
+		});
+
+		console.log('Map view:', map.getView());
+		console.log('Map target:', map.getTarget());
+	}
+
+	function initMap(startLocation) {
+		map = new Map({
+			target: 'map',
+			layers: [tileLayer, vectorLayer],
 			view: new View({
 				center: startLocation,
 				zoom: zoom
 			})
 		});
-
-		draw = new Draw({
-			source: vectorSource,
-			type: 'Point',
-			style: crossStyle
-		});
-
 		map.addInteraction(draw);
 		map.on('click', (event) => {
 			const coordinates = event.coordinate;
 			const lonLat = toLonLat(coordinates);
 			const latitude = lonLat[1];
 			const longitude = lonLat[0];
-			console.log(longitude, latitude);
+			console.log(lonLat);
 			$waypoints.push({ latitude: latitude, longitude: longitude });
 		});
 
@@ -125,6 +157,10 @@
 		window.addEventListener('resize', () => {
 			map.updateSize();
 		});
+	}
+
+	onMount(() => {
+		initMap(startLocation);
 	});
 
 	$: {

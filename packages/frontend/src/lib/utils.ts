@@ -3,11 +3,6 @@ import { twMerge } from 'tailwind-merge';
 import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
 
-export const mapStartLoc = {
-	longitude: -118.30049006438229,
-	latitude: 34.11844295532757
-};
-
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }

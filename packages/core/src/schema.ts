@@ -17,3 +17,10 @@ export const iotFormSchema = z.object({
 	sessionId: z.string(),
 	service: iotTypes
 });
+export type IotFormSchema = typeof iotFormSchema;
+
+export const startLocSchema = z.object({
+	latitude: z.number(),
+	longitude: z.number()
+});
+export type StartLocFormSchema = typeof startLocSchema;
