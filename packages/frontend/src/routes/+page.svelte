@@ -3,20 +3,20 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { messages, waypoints } from '$lib/store';
+	import { messages, waypoints, startingLocation } from '$lib/store';
 	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
 	// import MyChart from '$lib/components/TsChart.svelte';
 	import DroneTable from '$lib/components/DroneTable.svelte';
 	import MqttConnection from '$lib/connect';
-	import type { DroneTelemetryData, TelemetryResults } from '@viziot/core/src/drone';
+	import type { DroneTelemetry, TelemetryResults } from '@viziot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import { Card } from '$lib/components/ui/card/index';
 	import * as Form from '$lib/components/ui/form';
 	import { iotFormSchema } from '@viziot/core/src/schema';
 
-	let idleLimit = 1 * 60 * 1000; // x minutes
+	let idleLimit = 3 * 60 * 1000; // x minutes
 	let idleTimeout;
 
 	export let data: PageData;
@@ -62,31 +62,7 @@
 
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 
-	if (browser) {
-		onMount(() => {
-			trackUserActivity();
-		});
-
-		function resetIdleTimer() {
-			// clearTimeout(idleTimeout);
-			startIdleTimer();
-		}
-
-		function trackUserActivity() {
-			// window.addEventListener('mousemove', resetIdleTimer);
-			// window.addEventListener('keydown', resetIdleTimer);
-			// window.addEventListener('touchstart', resetIdleTimer);
-			// window.addEventListener('scroll', resetIdleTimer);
-			// startIdleTimer(); // Start the initial timer
-			// console.log('startIdleTimer');
-		}
-
-		function startIdleTimer() {
-			idleTimeout = setTimeout(() => {
-				mqttConnection.disconnect();
-				console.log('idle too long, disconnected');
-			}, idleLimit);
-		}
+	function connectMqtt(): MqttConnection.getClient {
 		const mqttConnection = MqttConnection.getInstance();
 		mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
 		const client = mqttConnection.getClient();
@@ -100,7 +76,7 @@
 		});
 		client.on('message', (_fullTopic, payload) => {
 			let msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
-			const telemetryData: DroneTelemetryData = JSON.parse(msg);
+			const telemetryData: DroneTelemetry = JSON.parse(msg);
 			if (payload.dup) {
 				console.log(`Received late message: ${msg}`);
 			} else {
@@ -117,25 +93,57 @@
 		client.on('close', () => {
 			console.log('Disconnected from MQTT broker');
 		});
+		return client;
+	}
+
+	if (browser) {
+		onMount(() => {
+			trackUserActivity();
+		});
+
+		const client = connectMqtt();
 		client.connect();
 
+		function trackUserActivity() {
+			window.addEventListener('click', resetIdleTimer);
+			window.removeEventListener('mousemove', resetIdleTimer);
+			window.removeEventListener('touchstart', resetIdleTimer);
+			window.removeEventListener('scroll', resetIdleTimer);
+			startIdleTimer(); // Start the initial timer
+		}
+
+		function resetIdleTimer() {
+			clearTimeout(idleTimeout);
+			startIdleTimer();
+			window.location.reload();
+			// if (!client.connected) {
+			// 	client.reconnect();
+		}
+
+		function startIdleTimer() {
+			idleTimeout = setTimeout(() => {
+				client.end();
+				console.log('idle too long, disconnected');
+			}, idleLimit);
+		}
 		window.addEventListener('beforeunload', () => {
-			mqttConnection.disconnect();
+			client.end();
 		});
 		window.addEventListener('popstate', () => {
-			mqttConnection.disconnect();
-		});
-
-		onDestroy(() => {
-			// window.removeEventListener('mousemove', resetIdleTimer);
-			// window.removeEventListener('keydown', resetIdleTimer);
-			// window.removeEventListener('touchstart', resetIdleTimer);
-			// window.removeEventListener('scroll', resetIdleTimer);
-			// clearTimeout(idleTimeout); // Clear the idle timer
-			// console.log('OnDestroy');
-			// mqttConnection.disconnect();
+			client.end();
 		});
 	}
+
+	onDestroy(() => {
+		if (browser) {
+			window.removeEventListener('mousemove', resetIdleTimer);
+			window.removeEventListener('touchstart', resetIdleTimer);
+			window.removeEventListener('scroll', resetIdleTimer);
+			// clearTimeout(idleTimeout); // Clear the idle timer
+			console.log('OnDestroy');
+			// mqttConnection.disconnect();
+		}
+	});
 
 	let mapComponent;
 	let vizComponent;
@@ -165,8 +173,12 @@
 			longitude = lng;
 		}
 	}
-	let startLocLong;
-	let startLocLat;
+	let startLocLong = $startingLocation.longitude;
+	let startLocLat = $startingLocation.latitude;
+
+	function resetIdleTimer(this: Window, ev: MouseEvent) {
+		throw new Error('Function not implemented.');
+	}
 </script>
 
 <div class="App">
@@ -201,7 +213,7 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Button on:click={() => changeStart()}>Submit</Form.Button>
+		<Form.Button on:click={() => changeStart()}>Change Start Location</Form.Button>
 		<form method="POST" use:enhance>
 			<Form.Field {form} name="speed" class="width:50%;">
 				<Form.Control let:attrs>
@@ -219,24 +231,24 @@
 				<Form.Description>*max duration of flight is limited to 20 seconds</Form.Description>
 				<Form.FieldErrors />
 			</Form.Field>
-			<Form.Button>Submit</Form.Button>
+			<div class="flex justify-center gap-2">
+				<Form.Button>Submit</Form.Button>
+				<Button
+					class="btn"
+					name="clear"
+					id="clear"
+					on:click={() => {
+						messages.set([]);
+						clearMap();
+						clearViz();
+						waypoints.set([]);
+						res = undefined;
+					}}
+				>
+					Reset
+				</Button>
+			</div>
 		</form>
-		<div>
-			<Button
-				class="btn"
-				name="clear"
-				id="clear"
-				on:click={() => {
-					messages.set([]);
-					clearMap();
-					clearViz();
-					waypoints.set([]);
-					res = undefined;
-				}}
-			>
-				Clear
-			</Button>
-		</div>
 		<div class="results">
 			{#if res}
 				{#await res then res}
@@ -326,18 +338,5 @@
 		width: 100%;
 		align-items: center;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	}
-
-	.message {
-		display: block;
-		overflow-wrap: break-word;
-		word-wrap: break-word;
-		hyphens: auto;
-		text-align: justify;
-		padding: 10px;
-		border-bottom: 1px solid #ccc;
-	}
-	.message:last-child {
-		border-bottom: none;
 	}
 </style>

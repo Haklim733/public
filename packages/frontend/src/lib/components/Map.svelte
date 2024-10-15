@@ -10,7 +10,7 @@
 	import { transform, toLonLat } from 'ol/proj';
 	import { Point } from 'ol/geom';
 
-	import { messages, waypoints } from '$lib/store';
+	import { messages, waypoints, startingLocation } from '$lib/store';
 
 	const tileCache = {};
 	const vectorSource = new VectorSource({
@@ -48,10 +48,14 @@
 		style: crossStyle
 	});
 	let map;
-	let longitude = -118.30049006438229;
-	let latitude = 34.11844295532757;
+	// let longitude = ;
+	// let latitude = 34.11844295532757;
 	const zoom = 18;
-	let startLocation = transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857');
+	let startLocation = transform(
+		[$startingLocation.longitude, $startingLocation.latitude],
+		'EPSG:4326',
+		'EPSG:3857'
+	);
 	let startFeature = new Feature(new Point(startLocation));
 	startFeature.setStyle(
 		new Style({
@@ -117,7 +121,7 @@
 		vectorSource.changed();
 		map.render();
 		map.addInteraction(draw);
-		$waypoints.set([]);
+		waypoints.set([]);
 		map.on('click', (event) => {
 			const coordinates = event.coordinate;
 			const lonLat = toLonLat(coordinates);
@@ -126,9 +130,6 @@
 			console.log(lonLat);
 			$waypoints.push({ latitude: latitude, longitude: longitude });
 		});
-
-		console.log('Map view:', map.getView());
-		console.log('Map target:', map.getTarget());
 	}
 
 	function initMap(startLocation) {

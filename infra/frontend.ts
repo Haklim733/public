@@ -34,20 +34,6 @@ export const site = new sst.aws.SvelteKit('VizIotSite', {
 		}
 	}
 });
-
-if (!$dev) {
-	const router = new sst.aws.Router('MyRouter', {
-		domain: {
-			dns: sst.aws.dns({
-				zone: $app.stage === 'prod' ? 'Z0140882217FY9MCT4KM1' : 'Z1048110TMWW9X3WITD5'
-			}),
-			name: domain
-		},
-		routes: {
-			'/projects/iot*': $output(site.url)
-		}
-	});
-}
 // const exposeHeaders = [
 // 	'Date',
 // 	'Keep-Alive',
