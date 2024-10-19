@@ -1,0 +1,86 @@
+h1 {
+	font-weight: bold;
+}
+
+.instructions {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+	place-items: center;
+}
+
+.App {
+	height: 100%;
+	width: 100%;
+	display: grid;
+	text-align: center;
+	place-items: center;
+	grid-template-columns: 1fr 2fr;
+	grid-template-rows: 1fr auto;
+}
+.left-top-container {
+	grid-column: 1 / 2;
+	grid-row: 1;
+	display: grid;
+	gap: 1%;
+	padding: 2% 2%;
+	overflow-y: auto;
+	height: 100%;
+	width: 100%;
+	max-width: 30vw;
+	position: sticky;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.right-top-container {
+	grid-column: 2;
+	grid-row: 1;
+	gap: 1%;
+	padding: 2% 2%;
+	height: 100%;
+	width: 100%;
+	max-width: 100%;
+	max-height: 100%;
+	align-items: center;
+	position: sticky;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.left-bottom-container {
+	grid-column: 1;
+	grid-row: 2;
+	gap: 1%;
+	padding: 2% 4%;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	max-height: 100%;
+	max-width: 100%;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.map {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+.right-bottom-container {
+	grid-column: 2;
+	grid-row: 2;
+	gap: 1%;
+	padding: 2% 2%;
+	height: 100%;
+	width: 100%;
+	align-items: center;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1200px) {
+}
+
+@media only screen and (max-width: 768px) {
+}
+
+@media only screen and (max-width: 480px) {
+}
+
+@media only screen and (max-width: 320px) {
+}

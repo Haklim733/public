@@ -8,14 +8,14 @@
 	import Map from '$lib/components/Map.svelte';
 	// import MyChart from '$lib/components/TsChart.svelte';
 	import DroneTable from '$lib/components/DroneTable.svelte';
+	import Popup from '$lib/components/Popup.svelte';
 	import MqttConnection from '$lib/connect';
 	import type { DroneTelemetry, TelemetryResults } from '@viziot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
-	import { Card } from '$lib/components/ui/card/index';
 	import * as Form from '$lib/components/ui/form';
 	import { iotFormSchema } from '@viziot/core/src/schema';
-	import Alert from '$lib/components/ui/alert';
+	import * as Alert from '$lib/components/ui/alert/index.ts';
 
 	let idleLimit = 3 * 60 * 1000; // x minutes
 	let idleTimeout;
@@ -177,13 +177,29 @@
 	}
 </script>
 
+<div class="instructions">
+	<h1>Test Drone Flight Telemetry with MQTT</h1>
+	<Alert.Root>
+		<Alert.Title>Instructions</Alert.Title>
+		<Alert.Description
+			>You can change the starting location by entering coordinates below. Click on the map to set
+			waypoints and set speed of drone below. Click submit to see flight path and estimated
+			distance. The telemetry data will also be stremed below.</Alert.Description
+		>
+	</Alert.Root>
+	<div class="results">
+		{#if res}
+			{#await res then res}
+				<Popup data={{ 'totalDistance (meters)': res.totalDistance }} />
+			{:catch error}
+				<p>Error: {error.message}</p>
+			{/await}
+		{/if}
+	</div>
+</div>
+
 <div class="App">
 	<div class="left-top-container">
-		<h1>Test Drone Flight Telemetry with MQTT</h1>
-		{#if import.meta.env.VITE_STAGE !== 'prod'}
-			<SuperDebug data={$formData} />
-		{/if}
-		<Alert type="info">'Enter geo-coordinates to change start locations!</Alert>;
 		<Form.Field {form} name="startLong" class="width:50%;">
 			<Form.Control let:attrs>
 				<Form.Label>Start Location Longitude</Form.Label>
@@ -214,6 +230,9 @@
 		</Form.Field>
 		<Form.Button on:click={() => changeStart()}>Change Start Location</Form.Button>
 		<form method="POST" use:enhance>
+			<Alert.Root>
+				<Alert.Title>Enter speed of the drone below (m/s)</Alert.Title>
+			</Alert.Root>
 			<Form.Field {form} name="speed" class="width:50%;">
 				<Form.Control let:attrs>
 					<Form.Label>Speed of the drone</Form.Label>
@@ -226,7 +245,6 @@
 						placeholder="Enter 5-60"
 					/>
 				</Form.Control>
-				<Form.Description>This is the speed of the drone (m/s)</Form.Description>
 				<Form.Description>*max duration of flight is limited to 20 seconds</Form.Description>
 				<Form.FieldErrors />
 			</Form.Field>
@@ -248,19 +266,6 @@
 				</Button>
 			</div>
 		</form>
-		<div class="results">
-			{#if res}
-				{#await res then res}
-					<Card>
-						<h2>Flight Summary</h2>
-						<!-- <p>Total Time: {res.totalTime.toFixed(1)} seconds</p> -->
-						<p>Total Distance: {res.totalDistance} meters</p>
-					</Card>
-				{:catch error}
-					<p>Error: {error.message}</p>
-				{/await}
-			{/if}
-		</div>
 	</div>
 	<div class="left-bottom-container">
 		{#if $messages.length > 0}
@@ -269,7 +274,6 @@
 		{/if}
 	</div>
 	<div class="right-top-container">
-		<h2>Click on the Map to set Waypoints</h2>
 		<div id="map" class="map">
 			<Map bind:this={mapComponent} on:click={setCoordinates} />
 		</div>

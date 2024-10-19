@@ -79,8 +79,8 @@
 
 	export function clearVectorSource() {
 		vectorSource.clear();
+		vectorSource.addFeature(startFeature);
 		vectorSource.changed();
-		// vectorSource.addFeature(startFeature);
 	}
 
 	export function updateStartLoc(longitude: string, latitude: string) {
