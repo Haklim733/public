@@ -15,7 +15,7 @@
 	import { Card } from '$lib/components/ui/card/index';
 	import * as Form from '$lib/components/ui/form';
 	import { iotFormSchema } from '@viziot/core/src/schema';
-	import { map } from 'zod';
+	import Alert from '$lib/components/ui/alert';
 
 	let idleLimit = 3 * 60 * 1000; // x minutes
 	let idleTimeout;
@@ -57,7 +57,7 @@
 			body: JSON.stringify(props)
 		});
 		if (!res.ok) {
-			throw new Error('Network response was not ok');
+			throw new Error('Publish Telemetry Error');
 		}
 		const fetchedData = await res.json();
 		return fetchedData.data;
@@ -112,7 +112,9 @@
 	function startIdleTimer(client) {
 		idleTimeout = setTimeout(() => {
 			timedOut = true;
-			client.end();
+			if (client) {
+				client.end();
+			}
 			console.log('idle too long, disconnected');
 		}, idleLimit);
 	}
@@ -178,7 +180,10 @@
 <div class="App">
 	<div class="left-top-container">
 		<h1>Test Drone Flight Telemetry with MQTT</h1>
-		<SuperDebug data={$formData} />
+		{#if import.meta.env.VITE_STAGE !== 'prod'}
+			<SuperDebug data={$formData} />
+		{/if}
+		<Alert type="info">'Enter geo-coordinates to change start locations!</Alert>;
 		<Form.Field {form} name="startLong" class="width:50%;">
 			<Form.Control let:attrs>
 				<Form.Label>Start Location Longitude</Form.Label>
@@ -211,7 +216,7 @@
 		<form method="POST" use:enhance>
 			<Form.Field {form} name="speed" class="width:50%;">
 				<Form.Control let:attrs>
-					<Form.Label>Speed</Form.Label>
+					<Form.Label>Speed of the drone</Form.Label>
 					<Input
 						{...attrs}
 						bind:value={$formData.speed}
@@ -270,67 +275,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.App {
-		height: 100%;
-		width: 100%;
-		display: grid;
-		text-align: center;
-		place-items: center;
-		grid-template-columns: 1fr 1fr;
-		grid-template-rows: 1fr auto;
-	}
-	.left-top-container {
-		grid-column: 1;
-		grid-row: 1;
-		display: grid;
-		gap: 1%;
-		padding: 2% 2%;
-		overflow-y: auto;
-		height: 100%;
-		width: 80%;
-		max-width: 100%;
-		position: sticky;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	}
-	.right-top-container {
-		grid-column: 2;
-		grid-row: 1;
-		gap: 1%;
-		padding: 2% 2%;
-		height: 100%;
-		width: 100%;
-		max-width: 100%;
-		max-height: 100%;
-		align-items: center;
-		position: sticky;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	}
-	.left-bottom-container {
-		grid-column: 1;
-		grid-row: 2;
-		gap: 1%;
-		padding: 2% 4%;
-		overflow-y: scroll;
-		overflow-x: hidden;
-		max-height: 100%;
-		max-width: 100%;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	}
-	.map {
-		position: relative;
-		width: 100%;
-		height: 100%;
-	}
-	.right-bottom-container {
-		grid-column: 2;
-		grid-row: 2;
-		gap: 1%;
-		padding: 2% 2%;
-		height: 100%;
-		width: 100%;
-		align-items: center;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	}
-</style>
