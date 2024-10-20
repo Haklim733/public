@@ -28,7 +28,6 @@
 		"vite": "^5.0.3"
 	},
 	"dependencies": {
-		"@unovis/svelte": "^1.4.3-beta.0",
 		"@unovis/ts": "^1.4.3-beta.0",
 		"@viziot/core": "workspace:*",
 		"bits-ui": "^0.21.16",
