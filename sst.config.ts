@@ -4,13 +4,17 @@ export default $config({
 	app(input) {
 		return {
 			name: 'viziot',
-			removal: input.stage === 'production' ? 'retain' : 'remove',
+			removal: input.stage === 'prod' ? 'retain' : 'remove',
 			home: 'aws',
-			region: 'us-west-1'
+			region: 'us-west-1',
+			providers: {
+				aws: {
+					profile: input.stage === 'prod' ? 'myprod' : 'default'
+				}
+			}
 		};
 	},
 	async run() {
-		console.log($app.stage);
 		const rtServer = await import('./infra/realtime');
 		const frontend = await import('./infra/frontend');
 		return {
