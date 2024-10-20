@@ -9,6 +9,7 @@
 	import { Icon, Style, Circle, Fill, Text } from 'ol/style';
 	import { transform, toLonLat } from 'ol/proj';
 	import { Point } from 'ol/geom';
+	// import OLCesium from 'olcs';
 
 	import { messages, waypoints, startingLocation } from '$lib/store';
 
@@ -130,6 +131,8 @@
 			console.log(lonLat);
 			$waypoints.push({ latitude: latitude, longitude: longitude });
 		});
+		// const ol3d = new OLCesium({ map: map });
+		// ol3d.setEnabled(true);
 	}
 
 	function initMap(startLocation) {

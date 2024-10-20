@@ -6,10 +6,10 @@ export default $config({
 			name: 'viziot',
 			removal: input.stage === 'prod' ? 'retain' : 'remove',
 			home: 'aws',
-			region: 'us-west-1',
 			providers: {
 				aws: {
-					profile: input.stage === 'prod' ? 'myprod' : 'default'
+					profile: input.stage === 'prod' ? 'myprod' : 'default',
+					region: 'us-east-1'
 				}
 			}
 		};
