@@ -4,7 +4,6 @@
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { messages, waypoints, startingLocation } from '$lib/store';
-	import SuperDebug from 'sveltekit-superforms';
 	import Map from '$lib/components/Map.svelte';
 	// import MyChart from '$lib/components/TsChart.svelte';
 	import DroneTable from '$lib/components/DroneTable.svelte';

@@ -28,7 +28,6 @@
 		"vite": "^5.0.3"
 	},
 	"dependencies": {
-		"@unovis/ts": "^1.4.3-beta.0",
 		"@viziot/core": "workspace:*",
 		"bits-ui": "^0.21.16",
 		"clsx": "^2.1.1",

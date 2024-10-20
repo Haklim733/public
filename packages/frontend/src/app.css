@@ -77,10 +77,19 @@ h1 {
 }
 
 @media only screen and (max-width: 768px) {
+	.left-top-container {
+		max-width: 20vw;
+	}
 }
 
 @media only screen and (max-width: 480px) {
+	.left-top-container {
+		max-width: 16vw;
+	}
 }
 
 @media only screen and (max-width: 320px) {
+	.left-top-container {
+		max-width: 12vw;
+	}
 }
