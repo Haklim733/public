@@ -184,13 +184,13 @@
 		<Alert.Description
 			>You can change the starting location by entering coordinates below. Click on the map to set
 			waypoints and set speed of drone below. Click submit to see flight path and estimated
-			distance. The telemetry data will also be stremed below.</Alert.Description
+			distance. The telemetry data will also be streamed below.</Alert.Description
 		>
 	</Alert.Root>
 	<div class="results">
 		{#if res}
 			{#await res then res}
-				<Popup data={{ 'totalDistance (meters)': res.totalDistance }} />
+				<Popup data={{ 'Total Distance (meters)': res.totalDistance }} />
 			{:catch error}
 				<p>Error: {error.message}</p>
 			{/await}
@@ -235,7 +235,6 @@
 			</Alert.Root>
 			<Form.Field {form} name="speed" class="width:50%;">
 				<Form.Control let:attrs>
-					<Form.Label>Speed of the drone</Form.Label>
 					<Input
 						{...attrs}
 						bind:value={$formData.speed}
