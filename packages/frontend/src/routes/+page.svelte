@@ -7,7 +7,6 @@
 	import Map from '$lib/components/Map.svelte';
 	// import MyChart from '$lib/components/TsChart.svelte';
 	import DroneTable from '$lib/components/DroneTable.svelte';
-	import Popup from '$lib/components/Popup.svelte';
 	import MqttConnection from '$lib/connect';
 	import type { DroneTelemetry, TelemetryResults } from '@viziot/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
@@ -15,10 +14,12 @@
 	import * as Form from '$lib/components/ui/form';
 	import { iotFormSchema } from '@viziot/core/src/schema';
 	import * as Alert from '$lib/components/ui/alert/index.ts';
+	import { Card } from '$lib/components/ui/card/index.ts';
 
 	let idleLimit = 3 * 60 * 1000; // x minutes
 	let idleTimeout;
 	let timedOut = false;
+	let showResults = false;
 
 	export let data: PageData;
 	let res: Promise<TelemetryResults>;
@@ -42,6 +43,7 @@
 			console.log(JSON.stringify(dataToSend));
 			iotFormSchema.safeParse(dataToSend);
 			res = streamIot(dataToSend);
+			showResults = true;
 			console.log(res);
 			cancel();
 		}
@@ -187,9 +189,12 @@
 		>
 	</Alert.Root>
 	<div class="results">
-		{#if res}
+		{#if res && showResults}
 			{#await res then res}
-				<Popup data={{ 'Total Distance (meters)': res.totalDistance }} />
+				<Card>
+					<h2>Results</h2>
+					<p>Total Distance (meters): {res.totalDistance}</p>
+				</Card>
 			{:catch error}
 				<p>Error: {error.message}</p>
 			{/await}
@@ -258,6 +263,7 @@
 						clearViz();
 						waypoints.set([]);
 						res = undefined;
+						showResults = false;
 					}}
 				>
 					Reset
@@ -265,15 +271,15 @@
 			</div>
 		</form>
 	</div>
-	<div class="left-bottom-container">
-		{#if $messages.length > 0}
-			<h2>Streamed Data</h2>
-			<DroneTable telemetryData={$messages} />
-		{/if}
-	</div>
 	<div class="right-top-container">
 		<div id="map" class="map">
 			<Map bind:this={mapComponent} on:click={setCoordinates} />
 		</div>
 	</div>
+	{#if $messages.length > 0}
+		<div class="left-bottom-container">
+			<h2>Streamed Data</h2>
+			<DroneTable telemetryData={$messages} />
+		</div>
+	{/if}
 </div>
