@@ -149,6 +149,7 @@
 	onDestroy(() => {});
 
 	let mapComponent;
+	console.log('mapComponent:', mapComponent);
 	let vizComponent;
 
 	function clearMap() {
