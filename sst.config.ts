@@ -4,7 +4,7 @@ export default $config({
 	app(input) {
 		return {
 			name: 'viziot',
-			removal: input.stage === 'prod' ? 'retain' : 'remove',
+			removal: 'remove',
 			home: 'aws',
 			providers: {
 				aws: {

@@ -1,5 +1,5 @@
 {
-	"name": "mock-iot",
+	"name": "viziot",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -29,6 +29,6 @@
 		"@aws-sdk/client-iot-data-plane": "^3.665.0",
 		"@aws-sdk/client-kinesis": "^3.665.0",
 		"mqtt": "^5.10.1",
-		"sst": "^3.2.40"
+		"sst": "3.2.73"
 	}
 }
