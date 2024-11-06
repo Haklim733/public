@@ -8,7 +8,7 @@ export default $config({
 			home: 'aws',
 			providers: {
 				aws: {
-					profile: input.stage === 'prod' ? 'myprod' : 'default',
+					profile: input.stage === 'production' ? 'myprod' : 'default',
 					region: 'us-east-1'
 				}
 			}

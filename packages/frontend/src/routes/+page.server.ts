@@ -7,8 +7,8 @@ import { Resource } from 'sst';
 export const load: PageServerLoad = async ({ locals }) => {
 	const droneForm = await superValidate(zod(iotFormSchema));
 	const startLocForm = await superValidate(zod(startLocSchema));
-	const endpoint = Resource.IotServer.endpoint;
-	const authorizer = Resource.IotServer.authorizer;
+	const endpoint = Resource.IoTServer.endpoint;
+	const authorizer = Resource.IoTServer.authorizer;
 	const token = Resource.RT_TOKEN.value;
 	const appName = Resource.App.name;
 	const stage = Resource.App.stage;
