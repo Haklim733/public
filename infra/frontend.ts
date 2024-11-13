@@ -3,10 +3,10 @@ import { rtServer, rtToken } from './realtime';
 let domain = 'localhost';
 let url = 'http://localhost:5173';
 if ($app.stage === 'prod') {
-	domain = 'iot.iamlim.com';
+	domain = 'public.iamlim.com';
 }
 if ($app.stage === 'dev') {
-	domain = 'iot.dev.iamlim.com';
+	domain = 'public.dev.iamlim.com';
 }
 url = `https://${domain}`;
 
