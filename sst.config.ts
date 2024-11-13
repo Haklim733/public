@@ -3,7 +3,7 @@
 export default $config({
 	app(input) {
 		return {
-			name: 'viziot',
+			name: 'public',
 			removal: 'remove',
 			home: 'aws',
 			providers: {

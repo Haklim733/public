@@ -10,7 +10,7 @@ if ($app.stage === 'dev') {
 }
 url = `https://${domain}`;
 
-export const site = new sst.aws.SvelteKit('VizIotSite', {
+export const site = new sst.aws.SvelteKit('Public', {
 	dev: {
 		autostart: true
 	},

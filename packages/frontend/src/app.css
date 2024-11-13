@@ -46,7 +46,6 @@ h2 {
 	align-items: center;
 	position: center;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	background-color: grey;
 }
 .map {
 	height: 100%;
