@@ -2,7 +2,7 @@ import { rtServer, rtToken } from './realtime';
 
 let domain = 'localhost';
 let url = 'http://localhost:5173';
-if ($app.stage === 'prod') {
+if ($app.stage === 'production') {
 	domain = 'public.iamlim.com';
 }
 if ($app.stage === 'dev') {
