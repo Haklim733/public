@@ -56,7 +56,7 @@ export async function genDroneTelemetry(
 	let totalTime = 0;
 
 	let i = 0;
-	console.log('lenght of paths:' + paths.length);
+	console.log('length of paths:' + paths.length);
 	while (totalTime < duration && i < paths.length) {
 		const path = paths[i];
 		i++;

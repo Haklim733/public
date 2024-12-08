@@ -1,4 +1,4 @@
-import { genDroneTelemetry } from '@viziot/core/src/drone';
+import { genDroneTelemetry } from '@public/core/src/drone';
 import { Resource } from 'sst';
 import type { RequestEvent } from '@sveltejs/kit';
 

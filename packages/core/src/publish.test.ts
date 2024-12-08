@@ -1,4 +1,4 @@
-import { generateARVisionData } from '@viziot/core/src/ar';
+import { generateARVisionData } from '@public/core/src/ar';
 import { Resource } from 'sst';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
 import { test } from 'bun:test';
