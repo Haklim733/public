@@ -1,6 +1,6 @@
 import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
-import { iotFormSchema, startLocSchema } from '@viziot/core/src/schema';
+import { iotFormSchema, startLocSchema } from '@public/core/src/schema';
 import { zod } from 'sveltekit-superforms/adapters';
 import { Resource } from 'sst';
 

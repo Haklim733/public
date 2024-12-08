@@ -1,191 +1,174 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { XYZ } from 'ol/source';
-	import { Map, View, Feature } from 'ol';
-	import { Draw } from 'ol/interaction';
-	import { Tile as TileLayer } from 'ol/layer';
-	import { Vector as VectorLayer } from 'ol/layer';
-	import { Vector as VectorSource } from 'ol/source';
-	import { Icon, Style, Circle, Fill, Text } from 'ol/style';
-	import { transform, toLonLat } from 'ol/proj';
-	import { Point } from 'ol/geom';
+	import { onMount, onDestroy } from 'svelte';
+	import * as maplibre from 'maplibre-gl';
+	import 'maplibre-gl/dist/maplibre-gl.css';
+	import { telemetry, waypoints, startLocation } from '$lib/store';
 
-	import { messages, waypoints, startingLocation } from '$lib/store';
-
-	const tileCache = {};
-	const vectorSource = new VectorSource({
-		features: []
-	});
-	const tileLayer = new TileLayer({
-		source: new XYZ({
-			url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-			tileUrlFunction: function (tileCoord, pixelRatio, projection) {
-				const tileUrl = this.getTileUrl(tileCoord, pixelRatio, projection);
-				const cacheKey = `${tileCoord[0]}-${tileCoord[1]}-${tileCoord[2]}`;
-				if (!tileCache[cacheKey]) {
-					tileCache[cacheKey] = tileUrl;
-				}
-				return tileCache[cacheKey];
-			}
-		})
-	});
-	const vectorLayer = new VectorLayer({
-		source: vectorSource
-	});
-
-	const crossStyle = new Style({
-		image: new Icon({
-			anchor: [0.5, 0.5],
-			anchorXUnits: 'fraction',
-			anchorYUnits: 'fraction',
-			src: 'data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/><path d="M12 12l-8 8 8 8 8-8z"/></svg>'
-		})
-	});
-
-	const draw = new Draw({
-		source: vectorSource,
-		type: 'Point',
-		style: crossStyle
-	});
-	let map;
-	// let longitude = ;
-	// let latitude = 34.11844295532757;
-	const zoom = 18;
-	let startLocation = transform(
-		[$startingLocation.longitude, $startingLocation.latitude],
-		'EPSG:4326',
-		'EPSG:3857'
-	);
-	let startFeature = new Feature(new Point(startLocation));
-	startFeature.setStyle(
-		new Style({
-			image: new Circle({
-				radius: 4,
-				fill: new Fill({
-					color: 'blue'
-				})
-			}),
-			text: new Text({
-				text: 'Starting Location',
-				font: '14px Calibri,sans-serif',
-				fill: new Fill({
-					color: 'black'
-				}),
-				offsetX: 15,
-				offsetY: -15
-			})
-		})
-	);
-
-	export function clearVectorSource() {
-		vectorSource.clear();
-		vectorSource.addFeature(startFeature);
-		vectorSource.changed();
-	}
-
-	export function updateStartLoc(longitude: string, latitude: string) {
-		vectorSource.clear();
-		startLocation = transform(
-			[parseFloat(longitude), parseFloat(latitude)],
-			'EPSG:4326',
-			'EPSG:3857'
-		);
-		console.log('start location is' + startLocation);
-		const point = new Point(startLocation);
-		const newFeature = new Feature(point);
-		newFeature.setStyle(
-			new Style({
-				image: new Circle({
-					radius: 4,
-					fill: new Fill({
-						color: 'blue'
-					})
-				}),
-				text: new Text({
-					text: 'Starting Location',
-					font: '14px Calibri,sans-serif',
-					fill: new Fill({
-						color: 'black'
-					}),
-					offsetX: 15,
-					offsetY: -15
-				})
-			})
-		);
-		vectorLayer.getSource().refresh();
-		vectorSource.addFeature(newFeature);
-		map.getView().setCenter(startLocation);
-		map.getView().setZoom(17);
-		map.updateSize();
-		map.getView().changed();
-		vectorSource.changed();
-		map.render();
-		map.addInteraction(draw);
-		waypoints.set([]);
-		map.on('click', (event) => {
-			const coordinates = event.coordinate;
-			const lonLat = toLonLat(coordinates);
-			const latitude = lonLat[1];
-			const longitude = lonLat[0];
-			console.log(lonLat);
-			$waypoints.push({ latitude: latitude, longitude: longitude });
-		});
-	}
-
-	function initMap(startLocation) {
-		map = new Map({
-			target: 'map',
-			layers: [tileLayer, vectorLayer],
-			view: new View({
-				center: startLocation,
-				zoom: zoom
-			})
-		});
-		map.addInteraction(draw);
-		map.on('click', (event) => {
-			const coordinates = event.coordinate;
-			const lonLat = toLonLat(coordinates);
-			const latitude = lonLat[1];
-			const longitude = lonLat[0];
-			console.log(lonLat);
-			$waypoints.push({ latitude: latitude, longitude: longitude });
-		});
-
-		vectorSource.addFeature(startFeature);
-
-		map.updateSize();
-		map.getView().setCenter(startLocation);
-		window.addEventListener('resize', () => {
-			map.updateSize();
-		});
-	}
+	export let map;
+	let mapContainer;
 
 	onMount(() => {
-		initMap(startLocation);
+		map = new maplibre.Map({
+			center: [$startLocation.lon, $startLocation.lat],
+			zoom: $startLocation.zoom,
+			container: mapContainer,
+			pitch: $startLocation.pitch,
+			hash: false,
+			style: 'https://tiles.openfreemap.org/styles/liberty',
+			attributionControl: false,
+			// style: {
+			// 	version: 8,
+			// 	sources: {
+			// 		osm: {
+			// 			type: 'raster',
+			// 			tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+			// 			tileSize: 256,
+			// 			attribution: '&copy; OpenStreetMap Contributors',
+			// 			maxzoom: 19
+			// 		},
+			// 		// Use a different source for terrain and hillshade layers, to improve render quality
+			// 		terrainSource: {
+			// 			type: 'raster-dem',
+			// 			url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
+			// 			tileSize: 256
+			// 		},
+			// 		hillshadeSource: {
+			// 			type: 'raster-dem',
+			// 			url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
+			// 			tileSize: 256
+			// 		}
+			// 	},
+			// 	layers: [
+			// 		{
+			// 			id: 'osm',
+			// 			type: 'raster',
+			// 			source: 'osm'
+			// 		},
+			// 		{
+			// 			id: 'hills',
+			// 			type: 'hillshade',
+			// 			source: 'hillshadeSource',
+			// 			layout: { visibility: 'visible' },
+			// 			paint: { 'hillshade-shadow-color': '#473B24' }
+			// 		}
+			// 	],
+			// 	terrain: {
+			// 		source: 'terrainSource',
+			// 		exaggeration: 1
+			// 	},
+			// 	sky: {}
+			// },
+			maxZoom: 18,
+			maxPitch: 85
+		});
+
+		map.addControl(
+			new maplibre.NavigationControl({
+				visualizePitch: true,
+				showZoom: true,
+				showCompass: true
+			})
+		);
+
+		// map.addControl(
+		// 	new maplibre.TerrainControl({
+		// 		source: 'terrainSource',
+		// 		exaggeration: 1
+		// 	})
+		// );
+
+		// const iconStartLoc = document.createElement('div');
+		// iconStartLoc.className = 'marker';
+		// iconStartLoc.style.width = `10px`;
+		// iconStartLoc.style.height = `10px`;
+		new maplibre.Marker({ scale: 0.75 })
+			.setLngLat([$startLocation.lon, $startLocation.lat])
+			.addTo(map);
+
+		map.on('mousedown', (e) => {
+			if (e.originalEvent.ctrlKey) {
+				const coordinates = e.lngLat;
+				console.log(coordinates);
+				const marker = new maplibre.Marker({ color: 'green', scale: 0.75 })
+					.setLngLat(coordinates)
+					.addTo(map);
+				$waypoints = [...$waypoints, marker];
+			}
+		});
+
+		map.addControl(new maplibre.LogoControl({ compact: false }));
 	});
 
+	export function recenter(initalState: { lat: number; lon: number; zoom: number; pitch: number }) {
+		map.jumpTo({
+			center: [initalState.lon, initalState.lat],
+			zoom: initalState.zoom,
+			pitch: initalState.pitch
+		});
+	}
+
+	export function clearMap() {
+		$waypoints.forEach((marker) => {
+			marker.remove();
+		});
+	}
+
 	$: {
-		messages.subscribe((newMessages) => {
+		telemetry.subscribe((newMessages) => {
 			const latest = newMessages[newMessages.length - 1];
 			if (latest) {
-				const point = transform([latest.longitude, latest.latitude], 'EPSG:4326', 'EPSG:3857');
-				const pointFeature = new Feature(new Point(point));
-
-				const circleStyle = new Style({
-					image: new Circle({
-						radius: 5,
-						fill: new Fill({
-							color: 'red'
-						})
-					})
-				});
-
-				pointFeature.setStyle(circleStyle);
-				vectorSource.addFeature(pointFeature);
-				vectorSource.changed();
+				const marker = new maplibre.Marker({ color: 'red', scale: 0.75 })
+					.setLngLat([latest.longitude, latest.latitude])
+					.addTo(map);
+				$waypoints = [...$waypoints, marker];
 			}
 		});
 	}
+
+	onDestroy(() => {
+		if (map) {
+			map.remove();
+		}
+	});
 </script>
 
-<map />
+<div class="map-wrap">
+	<div class="map" bind:this={mapContainer}></div>
+</div>
+
+<style>
+	:root {
+		font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+		font-size: 16px;
+		line-height: 24px;
+		font-weight: 400;
+
+		color: #0f0f0f;
+		background-color: #f6f6f6;
+
+		font-synthesis: none;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		-webkit-text-size-adjust: 100%;
+	}
+
+	.map-wrap {
+		position: relative;
+		width: 100%;
+		height: calc(100vh - 77px); /* calculate height of the screen minus the heading */
+	}
+
+	.map {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			color: #f6f6f6;
+			background-color: #2f2f2f;
+		}
+	}
+</style>

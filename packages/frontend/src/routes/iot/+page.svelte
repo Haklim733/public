@@ -3,16 +3,16 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { messages, waypoints, startingLocation } from '$lib/store';
+	import { telemetry, waypoints, startLocation } from '$lib/store';
 	import Map from '$lib/components/Map.svelte';
 	// import MyChart from '$lib/components/TsChart.svelte';
 	import DroneTable from '$lib/components/DroneTable.svelte';
 	import MqttConnection from '$lib/connect';
-	import type { DroneTelemetry, TelemetryResults } from '@viziot/core/src/drone';
+	import type { DroneTelemetry, TelemetryResults } from '@public/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import * as Form from '$lib/components/ui/form';
-	import { iotFormSchema } from '@viziot/core/src/schema';
+	import { iotFormSchema } from '@public/core/src/schema';
 	import * as Alert from '$lib/components/ui/alert/index.ts';
 	import { Card } from '$lib/components/ui/card/index.ts';
 
@@ -24,8 +24,8 @@
 	export let data: PageData;
 	let res: Promise<TelemetryResults>;
 
-	let startLocLong = $startingLocation.longitude;
-	let startLocLat = $startingLocation.latitude;
+	let startLocLong = $startLocation.lon;
+	let startLocLat = $startLocation.lat;
 
 	const form = superForm(data.droneForm, {
 		applyAction: true,
@@ -33,14 +33,19 @@
 		resetForm: false,
 		multipleSubmits: data.stage === 'prod' ? 'prevent' : 'allow',
 		onSubmit: ({ formData, cancel }) => {
+			const waypoints: { longitude: number; latitude: number }[] = $waypoints.map((marker) => {
+				const { lng, lat } = marker.getLngLat();
+				return { longitude: lng, latitude: lat };
+			});
 			const dataToSend = {
 				startLocation: { longitude: startLocLong, latitude: startLocLat },
-				waypoints: $waypoints,
+				waypoints: waypoints,
 				speed: formData.get('speed'),
 				sessionId: data.sessionId,
 				service: 'drone'
 			};
-			console.log(JSON.stringify(dataToSend));
+
+			console.log(JSON.stringify(waypoints));
 			iotFormSchema.safeParse(dataToSend);
 			res = streamIot(dataToSend);
 			showResults = true;
@@ -86,7 +91,8 @@
 			if (payload.dup) {
 				console.log(`Received late message: ${msg}`);
 			} else {
-				messages.update((oldMessages) => [...oldMessages, telemetryData]);
+				console.log(telemetryData);
+				telemetry.update((oldMessages) => [...oldMessages, telemetryData]);
 			}
 		});
 		client.on('error', (error) => {
@@ -149,32 +155,10 @@
 	onDestroy(() => {});
 
 	let mapComponent;
-	console.log('mapComponent:', mapComponent);
-	let vizComponent;
 
-	function clearMap() {
-		if (mapComponent) {
-			mapComponent.clearVectorSource();
-		}
-	}
-	function clearViz() {
-		if (vizComponent) {
-			vizComponent.clearVizData();
-		}
-	}
 	function changeStart() {
 		if (mapComponent) {
-			mapComponent.updateStartLoc(startLocLong, startLocLat);
-		}
-	}
-	let latitude = 0;
-	let longitude = 0;
-
-	function setCoordinates(event) {
-		if (mapComponent) {
-			const { lat, lng } = mapComponent.map.latLngToLatLng(event.latlng);
-			latitude = lat;
-			longitude = lng;
+			mapComponent.recenter({ lat: startLocLat, lon: startLocLong, zoom: 17, pitch: 45 });
 		}
 	}
 </script>
@@ -184,10 +168,11 @@
 	<Alert.Root>
 		<Alert.Title>Instructions</Alert.Title>
 		<Alert.Description
-			>You can change the starting location by entering coordinates below. Click on the map to set
-			waypoints and set speed of drone below. Click submit to see flight path and estimated
-			distance. The telemetry data will also be streamed below.</Alert.Description
-		>
+			>You can change the starting location by entering coordinates below. Press Ctrl + click on the
+			map to set waypoints and set speed of drone below. Click submit to see flight path and
+			estimated distance. The telemetry data will also be streamed below. You can also hold down the
+			right mouse button to rotate map instead of using the controls on the upper right of the map.
+		</Alert.Description>
 	</Alert.Root>
 	<div class="results">
 		{#if res && showResults}
@@ -259,9 +244,10 @@
 					name="clear"
 					id="clear"
 					on:click={() => {
-						messages.set([]);
-						clearMap();
-						clearViz();
+						if (mapComponent) {
+							mapComponent.clearMap();
+						}
+						telemetry.set([]);
 						waypoints.set([]);
 						res = undefined;
 						showResults = false;
@@ -273,14 +259,12 @@
 		</form>
 	</div>
 	<div class="right-top-container">
-		<div id="map" class="map">
-			<Map bind:this={mapComponent} on:click={setCoordinates} />
-		</div>
+		<Map bind:this={mapComponent} />
 	</div>
-	{#if $messages.length > 0}
+	{#if $telemetry.length > 0}
 		<div class="left-bottom-container">
 			<h2>Streamed Data</h2>
-			<DroneTable telemetryData={$messages} />
+			<DroneTable telemetryData={$telemetry} />
 		</div>
 	{/if}
 </div>
