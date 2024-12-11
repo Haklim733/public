@@ -5,6 +5,23 @@ import crypto from 'crypto';
 let STAGE = import.meta.env.VITE_STAGE;
 
 export const handle: Handle = async ({ event, resolve }) => {
+
+	if (['.env', '/.git/config'].includes(event.url.pathname)) {
+		const ipAddress = event.request.headers.get('X-Forwarded-For') || event.getClientAddress();
+		console.log(ipAddress)
+
+		 return Promise.resolve(
+			new Response('Not Found', {
+				status: 404,
+				headers: {
+				'X-Robots-Tag': 'noindex, nofollow',
+				'Content-Security-Policy': 'default-src \'self\';',
+				'X-Frame-Options': 'DENY',
+				},
+			})
+		);
+	}
+
 	let sessionId = event.cookies.get('sessionId');
 	let isAuthenticated = false;
 
