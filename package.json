@@ -19,7 +19,9 @@
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.130",
 		"@types/bun": "^1.1.10",
+		"@typescript-eslint/parser": "^5.0.1",
 		"dotenv": "^16.3.1",
+		"eslint": "^9.16.0",
 		"typescript": "^5.3.3"
 	},
 	"workspaces": [

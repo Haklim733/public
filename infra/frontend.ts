@@ -4,11 +4,12 @@ let domain = 'localhost';
 let url = 'http://localhost:5173';
 if ($app.stage === 'production') {
 	domain = 'public.iamlim.com';
+	url = `https://${domain}`;
 }
 if ($app.stage === 'dev') {
 	domain = 'public.dev.iamlim.com';
+	url = `https://${domain}`;
 }
-url = `https://${domain}`;
 
 export const site = new sst.aws.SvelteKit('Public', {
 	dev: {

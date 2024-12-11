@@ -13,16 +13,17 @@
 	import { Input } from '$lib/components/ui/input/index';
 	import * as Form from '$lib/components/ui/form';
 	import { iotFormSchema } from '@public/core/src/schema';
-	import * as Alert from '$lib/components/ui/alert/index.ts';
-	import { Card } from '$lib/components/ui/card/index.ts';
+	import * as Alert from '$lib/components/ui/alert/index';
+	import { Card } from '$lib/components/ui/card/index';
+	import { MqttClient } from 'mqtt';
 
 	let idleLimit = 3 * 60 * 1000; // x minutes
-	let idleTimeout;
+	let idleTimeout: Timer;
 	let timedOut = false;
 	let showResults = false;
 
 	export let data: PageData;
-	let res: Promise<TelemetryResults>;
+	let res: Promise<TelemetryResults> | undefined;
 
 	let startLocLong = $startLocation.lon;
 	let startLocLat = $startLocation.lat;
@@ -54,7 +55,13 @@
 		}
 	});
 
-	export async function streamIot(props): Promise<TelemetryResults> {
+	export async function streamIot(props: {
+		startLocation: { longitude: number; latitude: number };
+		waypoints: { longitude: number; latitude: number }[];
+		speed: FormDataEntryValue | null;
+		sessionId: any;
+		service: string;
+	}): Promise<TelemetryResults> {
 		const res = await fetch(data.publishEndpoint, {
 			method: 'POST',
 			headers: {
@@ -73,10 +80,10 @@
 
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 
-	function connectMqtt(): MqttConnection.getClient {
+	function connectMqtt(): MqttClient {
 		const mqttConnection = MqttConnection.getInstance();
 		mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
-		const client = mqttConnection.getClient();
+		let client = mqttConnection.getClient();
 		client.on('connect', () => {
 			try {
 				client.subscribe(topic, { qos: 1 }); // set to 1 works; 0 does not
@@ -85,17 +92,17 @@
 				console.log(e);
 			}
 		});
-		client.on('message', (_fullTopic, payload) => {
+		client.on('message', (_fullTopic: any, payload: any) => {
 			let msg = new TextDecoder('utf8').decode(new Uint8Array(payload));
 			const telemetryData: DroneTelemetry = JSON.parse(msg);
 			if (payload.dup) {
 				console.log(`Received late message: ${msg}`);
 			} else {
 				console.log(telemetryData);
-				telemetry.update((oldMessages) => [...oldMessages, telemetryData]);
+				telemetry.update(($oldMessages) => [...$oldMessages, telemetryData]);
 			}
 		});
-		client.on('error', (error) => {
+		client.on('error', (error: any) => {
 			console.error('Error connecting to MQTT broker:', error);
 			client.end();
 		});
@@ -108,35 +115,37 @@
 		return client;
 	}
 
-	function resetIdleTimer(client) {
-		clearTimeout(idleTimeout);
-		startIdleTimer(client);
-		if (!client.connected && timedOut) {
-			const client = connectMqtt();
-			client.connect();
-		}
-	}
-	function startIdleTimer(client) {
-		idleTimeout = setTimeout(() => {
-			timedOut = true;
-			if (client) {
-				client.end();
-			}
-			console.log('idle too long, disconnected');
-		}, idleLimit);
-	}
 	if (browser) {
 		onMount(() => {
 			const client = connectMqtt();
 			client.connect();
-			function trackUserActivity(client) {
+
+			function resetIdleTimer() {
+				clearTimeout(idleTimeout);
+				startIdleTimer();
+				if (!client.connected && timedOut) {
+					client.connect();
+				}
+			}
+			function startIdleTimer() {
+				idleTimeout = setTimeout(() => {
+					timedOut = true;
+					if (client) {
+						client.end();
+					}
+					console.log('idle too long, disconnected');
+				}, idleLimit);
+			}
+
+			function trackUserActivity() {
 				window.addEventListener('click', resetIdleTimer);
 				window.removeEventListener('mousemove', resetIdleTimer);
 				window.removeEventListener('touchstart', resetIdleTimer);
 				window.removeEventListener('scroll', resetIdleTimer);
-				startIdleTimer(client); // Start the initial timer
+				startIdleTimer();
 			}
-			trackUserActivity(client);
+
+			trackUserActivity();
 			window.addEventListener('popstate', (state) => {
 				if (state && window.location.href === window.location.href) {
 					window.location.reload();
@@ -154,7 +163,7 @@
 
 	onDestroy(() => {});
 
-	let mapComponent;
+	let mapComponent: Map;
 
 	function changeStart() {
 		if (mapComponent) {
@@ -190,7 +199,7 @@
 
 <div class="App">
 	<div class="left-top-container">
-		<Form.Field {form} name="startLong" class="width:50%;">
+		<Form.Field {form} class="width:50%;">
 			<Form.Control let:attrs>
 				<Form.Label>Start Location Longitude</Form.Label>
 				<Input

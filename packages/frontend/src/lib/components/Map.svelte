@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import * as maplibre from 'maplibre-gl';
+	import type { Map } from 'maplibre-gl';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import { telemetry, waypoints, startLocation } from '$lib/store';
 
-	export let map;
-	let mapContainer;
+	export let map: Map;
+	let mapContainer: string | HTMLElement;
 
 	onMount(() => {
 		map = new maplibre.Map({

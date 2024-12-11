@@ -1,9 +1,10 @@
 // mqtt-connection.ts
 import mqtt from 'mqtt';
+import type { MqttClient} from 'mqtt';
 
 class MqttConnection {
 	private static instance: MqttConnection;
-	private client: any;
+	private client: MqttClient| undefined;
 
 	private constructor() {}
 
