@@ -2,7 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import { telemetry, waypoints, startLocation } from '$lib/store';
 	import Map from '$lib/components/Map.svelte';
 	// import MyChart from '$lib/components/TsChart.svelte';
@@ -77,6 +77,8 @@
 	}
 
 	const { form: formData, enhance } = form;
+	const formLoc = superForm(data.startLocForm, {});
+	const { form: formLocData, enhance: formLocEnhance } = formLoc;
 
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 
@@ -199,35 +201,37 @@
 
 <div class="App">
 	<div class="left-top-container">
-		<Form.Field {form} class="width:50%;">
-			<Form.Control let:attrs>
-				<Form.Label>Start Location Longitude</Form.Label>
-				<Input
-					{...attrs}
-					bind:value={startLocLong}
-					type="number"
-					min="5"
-					max="60"
-					placeholder="Enter 5-60"
-				/>
-			</Form.Control>
-			<Form.FieldErrors />
-		</Form.Field>
-		<Form.Field {form} name="startLong" class="width:50%;">
-			<Form.Control let:attrs>
-				<Form.Label>Start Location Latitude</Form.Label>
-				<Input
-					{...attrs}
-					bind:value={startLocLat}
-					type="number"
-					min="5"
-					max="60"
-					placeholder="Enter 5-60"
-				/>
-			</Form.Control>
-			<Form.FieldErrors />
-		</Form.Field>
-		<Form.Button on:click={() => changeStart()}>Change Start Location</Form.Button>
+		<form method="POST" use:formLocEnhance>
+			<Form.Field form={formLoc} name="longitude" class="width:50%;">
+				<Form.Control let:attrs>
+					<Form.Label>Start Location Longitude</Form.Label>
+					<Input
+						{...attrs}
+						bind:value={startLocLong}
+						type="number"
+						min="5"
+						max="60"
+						placeholder="Enter 5-60"
+					/>
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
+			<Form.Field form={formLoc} name="latitude" class="width:50%;">
+				<Form.Control let:attrs>
+					<Form.Label>Start Location Latitude</Form.Label>
+					<Input
+						{...attrs}
+						bind:value={startLocLat}
+						type="number"
+						min="5"
+						max="60"
+						placeholder="Enter 5-60"
+					/>
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
+			<Form.Button on:click={() => changeStart()}>Change Start Location</Form.Button>
+		</form>
 		<form method="POST" use:enhance>
 			<Alert.Root>
 				<Alert.Title>Enter speed of the drone below (m/s)</Alert.Title>

@@ -12,11 +12,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const token = Resource.RT_TOKEN.value;
 	const appName = Resource.App.name;
 	const stage = Resource.App.stage;
+	// @ts-ignore
+	const sessionId = locals.user.sessionId!;
 
 	return {
 		droneForm,
 		startLocForm,
-		sessionId: locals.user.sessionId,
+		sessionId: sessionId,
 		endpoint: endpoint,
 		authorizer: authorizer,
 		token: token,

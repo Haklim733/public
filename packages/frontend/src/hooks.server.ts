@@ -39,12 +39,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		// @ts-ignore
 		event.cookies.set('sessionId', sessionId, myOptions);
 	}
-	
 	// @ts-ignore
 	event.locals.user = {
 		isAuthenticated: isAuthenticated,
 		sessionId: sessionId,
 		properties: {}
-	};
+	};	
 	return resolve(event);
 };

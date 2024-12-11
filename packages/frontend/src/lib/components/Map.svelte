@@ -5,7 +5,7 @@
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import { telemetry, waypoints, startLocation } from '$lib/store';
 
-	export let map: Map;
+	let map: Map;
 	let mapContainer: string | HTMLElement;
 
 	onMount(() => {
