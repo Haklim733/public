@@ -1,22 +1,22 @@
 {
-	"name": "@public/core",
-	"version": "0.0.0",
-	"type": "module",
-	"scripts": {
-		"test": "sst bind vitest",
-		"typecheck": "tsc -noEmit"
-	},
-	"devDependencies": {
-		"@types/node": "^20.14.9",
-		"@types/uuid": "^10.0.0",
-		"@types/bun": "^1.1.10",
-		"vitest": "^1.6.0"
-	},
-	"files": [
-		"src/**/*"
-	],
-	"dependencies": {
-		"geolib": "^3.3.4",
-		"sst": "3.2.73"
-	}
+  "name": "@public/core",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "sst bind vitest",
+    "typecheck": "tsc -noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@types/uuid": "^10.0.0",
+    "@types/bun": "^1.1.10",
+    "vitest": "^1.6.0"
+  },
+  "files": [
+    "src/**/*"
+  ],
+  "dependencies": {
+    "geolib": "^3.3.4",
+    "sst": "3.4.32"
+  }
 }
