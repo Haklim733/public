@@ -5,12 +5,11 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { userInsertSchema } from '@public/core/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const { data } = await supabase.from('users').select();
 	let authenticated: boolean = false;
-
-	const form = await superValidate(zod(userInsertSchema));
+	// const { data } = await supabase.from('users').select();
 
 	return {
+		form: await superValidate(zod(userInsertSchema)),
 		user: {
 			authenticated: authenticated
 		}
@@ -18,36 +17,19 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	signUp: async ({ request }) => {
+	auth: async ({ request }) => {
 		const data = await request.formData();
 		const email = data.get('email') as string;
 		const password = data.get('password') as string;
+		const action = data.get('action') as string;
+		const res = await supabase.from('users').select();
 
-		const { user, error } = await supabase.auth.signUp({
-			email,
-			password
-		});
-
-		if (error) {
-			return { success: false, error: error.message };
+		if (res.error && action === 'signin') {
+			return { success: false, message: 'Could not find you. Please SignUp' };
+		} else if (res.error && action === 'signup') {
 		}
-
-		return { success: true, user };
-	},
-	login: async ({ request }) => {
-		const data = await request.formData();
-		const email = data.get('email') as string;
-		const password = data.get('password') as string;
-
-		const { user, error } = await supabase.auth.signInWithPassword({
-			email,
-			password
-		});
-
-		if (error) {
-			return { success: false, error: error.message };
+		if (!res.error && action === 'signup') {
+			return { success: true, message: 'SignUp successful!' };
 		}
-
-		return { success: true, user };
 	}
 };

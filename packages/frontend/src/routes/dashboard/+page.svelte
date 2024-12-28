@@ -5,7 +5,7 @@
 </script>
 
 {#if !data.user.authenticated}
-	<SignUpForm {data.form} />
+	<SignUpForm data={data.form} />
 {:else}
 	<DashboardPage {data} />
 {/if}

@@ -11,6 +11,10 @@
 		"strict": true,
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
+		"baseUrl": ".",
+		"paths": {
+			"@public/core/*": ["./src/*"]
+		}
 	},
 	"files": ["./sst-env.d.ts"]
 }
