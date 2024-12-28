@@ -2,9 +2,10 @@ import type { Handle } from '@sveltejs/kit';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 
-let STAGE = import.meta.env['VITE_STAGE'];
-
 export const handle: Handle = async ({ event, resolve }) => {
+	let STAGE = import.meta.env['PUBLIC_STAGE'];
+	event.locals.stage = STAGE;
+
 	if (['.env', '/.git/config'].includes(event.url.pathname)) {
 		const ipAddress = event.request.headers.get('X-Forwarded-For') || event.getClientAddress();
 		console.log(ipAddress);
@@ -44,6 +45,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 		isAuthenticated: isAuthenticated,
 		sessionId: sessionId,
 		properties: {}
-	};	
+	};
 	return resolve(event);
 };

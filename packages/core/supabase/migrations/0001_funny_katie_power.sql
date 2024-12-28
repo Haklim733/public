@@ -1,1 +1,0 @@
-ALTER TABLE "users_table" ADD CONSTRAINT "users_table_email_unique" UNIQUE("email");

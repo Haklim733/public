@@ -18,8 +18,8 @@ export const site = new sst.aws.SvelteKit('Public', {
 	buildCommand: 'bun run build',
 	domain: domain,
 	environment: {
-		VITE_STAGE: $app.stage,
-		VITE_DOMAIN: domain
+		PUBLIC_STAGE: $app.stage,
+		PUBLIC_DOMAIN: domain
 	},
 	link: [rtServer, rtToken],
 	path: 'packages/frontend',
