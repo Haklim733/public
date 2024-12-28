@@ -1,12 +1,21 @@
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { supabase } from '$lib/supabaseClient';
+import { superValidate } from 'sveltekit-superforms/server';
+import { zod } from 'sveltekit-superforms/adapters';
+import { userInsertSchema } from '@public/core/db/schema';
 
-export async function load() {
+export const load: PageServerLoad = async () => {
 	const { data } = await supabase.from('users').select();
+	let authenticated: boolean = false;
+
+	const form = await superValidate(zod(userInsertSchema));
+
 	return {
-		users: data ?? []
+		user: {
+			authenticated: authenticated
+		}
 	};
-}
+};
 
 export const actions: Actions = {
 	signUp: async ({ request }) => {

@@ -4,7 +4,12 @@ import { defineConfig } from 'vite';
 async function getConfig() {
 	return defineConfig({
 		plugins: [sveltekit()],
-		resolve: {}
+		resolve: {
+			alias: {
+				'@public/core/*': '../core/src/*',
+				'@public/core': '../core/src'
+			}
+		}
 	});
 }
 

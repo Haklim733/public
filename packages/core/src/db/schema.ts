@@ -1,4 +1,5 @@
 import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
 
 export const usersTable = pgTable('users', {
 	id: serial('id').primaryKey().notNull(),
@@ -8,3 +9,5 @@ export const usersTable = pgTable('users', {
 
 export type InsertUser = typeof usersTable.$inferInsert;
 export type SelectUser = typeof usersTable.$inferSelect;
+export const userSelectSchema = createSelectSchema(usersTable);
+export const userInsertSchema = createInsertSchema(usersTable);
