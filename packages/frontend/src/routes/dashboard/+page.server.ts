@@ -7,7 +7,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { featureFlags } from '$lib/store';
 
 export const load: PageServerLoad = async () => {
-	if (!featureFlags.dashboard && !['dev', 'production'].includes(import.meta.env['VITE_STAGE'])) {
+	if (!featureFlags.dashboard && ['dev', 'production'].includes(import.meta.env['VITE_STAGE'])) {
 		throw redirect(302, '/');
 	}
 	let authenticated: boolean = false;

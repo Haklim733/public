@@ -7,7 +7,7 @@ async function getConfig() {
 		plugins: [sveltekit()],
 		resolve: {
 			alias: {
-				'@public/core': path.resolve(__dirname, '../core/src')
+				'@public/core': path.resolve('../core/src')
 			}
 		}
 	});
