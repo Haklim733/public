@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
-	import { type InsertUser, userInsertSchema } from '@public/core/db/schema';
+	import { type InsertUser, userInsertSchema } from '@public/core/src/db/schema';
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 </script>
 

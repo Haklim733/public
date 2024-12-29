@@ -10,7 +10,7 @@
 		"sourceMap": true,
 		"strict": true,
 		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true
+		"allowImportingTsExtensions": true,
 	},
 	"files": ["./sst-env.d.ts"]
 }

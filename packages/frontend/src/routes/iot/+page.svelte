@@ -15,7 +15,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import * as Alert from '$lib/components/ui/alert/index';
 	import { Card } from '$lib/components/ui/card/index';
-	import { MqttClient } from 'mqtt';
+	import mqtt from 'mqtt';
 
 	let idleLimit = 3 * 60 * 1000; // x minutes
 	let idleTimeout: Timer;
@@ -82,7 +82,7 @@
 
 	let topic = `${data.appName}/${data.stage}/iot/${data.sessionId}`;
 
-	function connectMqtt(): MqttClient {
+	function connectMqtt(): mqtt.MqttClient {
 		const mqttConnection = MqttConnection.getInstance();
 		mqttConnection.connect(data.endpoint, data.authorizer, data.sessionId, data.token);
 		let client = mqttConnection.getClient();
