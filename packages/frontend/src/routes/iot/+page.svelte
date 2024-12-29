@@ -8,11 +8,11 @@
 	// import MyChart from '$lib/components/TsChart.svelte';
 	import DroneTable from '$lib/components/DroneTable.svelte';
 	import MqttConnection from '$lib/connect';
+	import { iotFormSchema } from '@public/core/src/schema';
 	import type { DroneTelemetry, TelemetryResults } from '@public/core/src/drone';
 	import { Button } from '$lib/components/ui/button/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import * as Form from '$lib/components/ui/form';
-	import { iotFormSchema } from '@public/core/src/schema';
 	import * as Alert from '$lib/components/ui/alert/index';
 	import { Card } from '$lib/components/ui/card/index';
 	import { MqttClient } from 'mqtt';
