@@ -1,6 +1,6 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect, type RequestEvent } from '@sveltejs/kit';
 
-export const GET = async (event) => {
+export const GET = async (event: RequestEvent) => {
 	const {
 		url,
 		locals: { supabase }
