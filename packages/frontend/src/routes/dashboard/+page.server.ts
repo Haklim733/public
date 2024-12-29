@@ -1,15 +1,16 @@
 import type { Actions, PageServerLoad } from './$types';
 import { supabase } from '$lib/supabaseClient';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate, message } from 'sveltekit-superforms/server';
+import { loginSchema, magiclinkSchema } from '$lib/schema';
 import { zod } from 'sveltekit-superforms/adapters';
-import { userInsertSchema } from '@public/core/db/schema';
+import { fail } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async () => {
 	let authenticated: boolean = false;
-	// const { data } = await supabase.from('users').select();
 
 	return {
-		form: await superValidate(zod(userInsertSchema)),
+		formLogin: await superValidate(zod(loginSchema)),
+		formMagicLink: await superValidate(zod(magiclinkSchema)),
 		user: {
 			authenticated: authenticated
 		}
@@ -17,19 +18,44 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	auth: async ({ request }) => {
-		const data = await request.formData();
-		const email = data.get('email') as string;
-		const password = data.get('password') as string;
-		const action = data.get('action') as string;
-		const res = await supabase.from('users').select();
+	login: async ({ request }) => {
+		const form = await superValidate(request, zod(loginSchema));
+		if (!form.valid) return fail(400, { form });
 
-		if (res.error && action === 'signin') {
-			return { success: false, message: 'Could not find you. Please SignUp' };
-		} else if (res.error && action === 'signup') {
+		const email = form.data.email;
+		const password = form.data.password;
+		const { data, error } = await supabase.auth.signInWithPassword({
+			email: email,
+			password: password
+		});
+		if (!form.valid) return fail(400, { form });
+
+		console.log(data);
+		if (!data.user) {
+			const { data, error } = await supabase.auth.signUp({
+				email: email,
+				password: password
+			});
+			if (error) {
+				return fail(400, { form, message: 'Error creating user' });
+			}
 		}
-		if (!res.error && action === 'signup') {
-			return { success: true, message: 'SignUp successful!' };
-		}
+
+		return message(form, 'Form posted successfully!');
+	},
+	magiclink: async ({ request }) => {
+		const form = await superValidate(request, zod(loginSchema));
+		if (!form.valid) return fail(400, { form });
+		const email = form.data.email;
+
+		const { data, error } = await supabase.auth.signInWithOtp({
+			email: email,
+			options: {
+				// set this to false if you do not want the user to be automatically signed up
+				shouldCreateUser: false,
+				emailRedirectTo: '/'
+			}
+		});
+		return message(form, 'Form posted successfully!');
 	}
 };

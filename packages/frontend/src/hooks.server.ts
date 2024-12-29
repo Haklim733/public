@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	let STAGE = import.meta.env['PUBLIC_STAGE'];
+	let STAGE = import.meta.env['VITE_STAGE'];
 	event.locals.stage = STAGE;
 
 	if (['.env', '/.git/config'].includes(event.url.pathname)) {
@@ -22,7 +22,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		);
 	}
 
-	let sessionId = event.cookies.get('sessionId');
+	let sessionId = event.cookies.get('access_token');
 	let isAuthenticated = false;
 
 	if (!sessionId) {
