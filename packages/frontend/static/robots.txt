@@ -1,0 +1,16 @@
+# Allow all robots to access everything
+User-agent: *
+Disallow:
+
+# Disallow access to specific paths
+User-agent: *
+Disallow: /admin
+Disallow: /private
+Disallow: /.env
+Disallow: /.git
+Disallow: /s3cmd.ini
+Disallow: /ads.txt
+Disallow: /ads.txt
+
+# Specify a crawl delay (optional)
+Crawl-delay: 10

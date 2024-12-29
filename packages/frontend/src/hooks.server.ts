@@ -6,13 +6,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	let STAGE = import.meta.env['VITE_STAGE'];
 	event.locals.stage = STAGE;
 
-	if (['.env', '/.git/config'].includes(event.url.pathname)) {
+	if (['.env', '/.git/config', 'ads.txt', 's3cmd.ini'].includes(event.url.pathname)) {
 		const ipAddress = event.request.headers.get('X-Forwarded-For') || event.getClientAddress();
 		console.log(ipAddress);
 
 		return Promise.resolve(
-			new Response('Not Found', {
-				status: 404,
+			new Response('Forbidden', {
+				status: 403,
 				headers: {
 					'X-Robots-Tag': 'noindex, nofollow',
 					'Content-Security-Policy': "default-src 'self';",
