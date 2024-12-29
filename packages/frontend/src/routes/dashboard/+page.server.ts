@@ -1,5 +1,4 @@
 import type { Actions, PageServerLoad } from './$types';
-import { supabase } from '$lib/supabaseClient';
 import { superValidate, message } from 'sveltekit-superforms/server';
 import { loginSchema, magiclinkSchema } from '$lib/schema';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -22,7 +21,7 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	login: async ({ request }) => {
+	login: async ({ request, locals: { supabase } }) => {
 		const form = await superValidate(request, zod(loginSchema));
 		if (!form.valid) return fail(400, { form });
 
@@ -47,7 +46,7 @@ export const actions: Actions = {
 
 		return message(form, 'Form posted successfully!');
 	},
-	magiclink: async ({ request }) => {
+	magiclink: async ({ request, locals: { supabase } }) => {
 		const form = await superValidate(request, zod(loginSchema));
 		if (!form.valid) return fail(400, { form });
 		const email = form.data.email;

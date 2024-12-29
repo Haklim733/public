@@ -1,8 +1,8 @@
-import type { Handle } from '@sveltejs/kit';
-import { v4 as uuidv4 } from 'uuid';
-import crypto from 'crypto';
+import { type Handle, redirect } from '@sveltejs/kit';
+import { createServerClient } from '@supabase/ssr';
+import { sequence } from '@sveltejs/kit/hooks';
 
-export const handle: Handle = async ({ event, resolve }) => {
+const supabase: Handle = async ({ event, resolve }) => {
 	let STAGE = import.meta.env['VITE_STAGE'];
 	event.locals.stage = STAGE;
 
@@ -21,30 +21,70 @@ export const handle: Handle = async ({ event, resolve }) => {
 			})
 		);
 	}
+	let supabaseUrl = import.meta.env['SUPABASE_URL'];
+	let supabaseKey = import.meta.env['SUPABASE_ANON_KEY'];
 
-	let sessionId = event.cookies.get('access_token');
-	let isAuthenticated = false;
+	event.locals.supabase = createServerClient(supabaseUrl, supabaseKey, {
+		cookies: {
+			getAll: () => event.cookies.getAll(),
+			/**
+			 * SvelteKit's cookies API requires `path` to be explicitly set in
+			 * the cookie options. Setting `path` to `/` replicates previous/
+			 * standard behavior.
+			 */
+			setAll: (cookiesToSet: { name: string; value: string; options: any }[]) => {
+				cookiesToSet.forEach(({ name, value, options }) => {
+					event.cookies.set(name, value, { ...options, path: '/' });
+				});
+			}
+		}
+	});
 
-	if (!sessionId) {
-		let fullSessionId = uuidv4();
-		sessionId = crypto.createHash('sha256').update(fullSessionId).digest('hex').slice(0, 16);
-		console.log(sessionId);
-		const myOptions = {
-			maxAge: 60 * 60 * 1 * 1,
-			httpOnly: true,
-			sameSite: 'lax',
-			secure: false,
-			domain: ['dev', 'llee'].includes(STAGE) ? 'localhost' : import.meta.env['VITE_DOMAIN'],
-			path: '/'
-		};
-		// @ts-ignore
-		event.cookies.set('sessionId', sessionId, myOptions);
-	}
-	// @ts-ignore
-	event.locals.user = {
-		isAuthenticated: isAuthenticated,
-		sessionId: sessionId,
-		properties: {}
+	event.locals.safeGetSession = async () => {
+		const {
+			data: { session }
+		} = await event.locals.supabase.auth.getSession();
+		if (!session) {
+			return { session: null, user: null };
+		}
+
+		const {
+			data: { user },
+			error
+		} = await event.locals.supabase.auth.getUser();
+		if (error) {
+			// JWT validation has failed
+			return { session: null, user: null };
+		}
+
+		return { session, user };
 	};
+
+	return resolve(event, {
+		filterSerializedResponseHeaders(name) {
+			/**
+			 * Supabase libraries use the `content-range` and `x-supabase-api-version`
+			 * headers, so we need to tell SvelteKit to pass it through.
+			 */
+			return name === 'content-range' || name === 'x-supabase-api-version';
+		}
+	});
+};
+
+const authGuard: Handle = async ({ event, resolve }) => {
+	const { session, user } = await event.locals.safeGetSession();
+	event.locals.session = session;
+	event.locals.user = user;
+
+	if (!event.locals.session && event.url.pathname.startsWith('/private')) {
+		redirect(303, '/auth');
+	}
+
+	if (event.locals.session && event.url.pathname === '/auth') {
+		redirect(303, '/private');
+	}
+
 	return resolve(event);
 };
+
+export const handle: Handle = sequence(supabase, authGuard);
