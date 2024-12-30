@@ -4,9 +4,4 @@
 	export let data;
 </script>
 
-{#if !data.user.authenticated}
-	<!-- <MagicLinkForm data={data.formMagicLink} /> -->
 	<LoginForm data={data.formLogin} />
-{:else}
-	<DashboardPage {data} />
-{/if}

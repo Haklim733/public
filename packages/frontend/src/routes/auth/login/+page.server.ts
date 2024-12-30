@@ -6,7 +6,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { featureFlags } from '$lib/store';
 
 export const load: PageServerLoad = async () => {
-	if (!featureFlags.dashboard && ['dev', 'production'].includes(import.meta.env['VITE_STAGE'])) {
+	if (!featureFlags.private && ['dev', 'production'].includes(import.meta.env['VITE_STAGE'])) {
 		throw redirect(302, '/');
 	}
 	let authenticated: boolean = false;
@@ -27,24 +27,27 @@ export const actions: Actions = {
 
 		const email = form.data.email;
 		const password = form.data.password;
-		const { data, error } = await supabase.auth.signInWithPassword({
-			email: email,
-			password: password
-		});
-		if (!form.valid) return fail(400, { form });
 
-		console.log(data);
-		if (!data.user) {
-			const { data, error } = await supabase.auth.signUp({
-				email: email,
-				password: password
-			});
-			if (error) {
-				return fail(400, { form, message: 'Error creating user' });
-			}
+		const { error } = await supabase.auth.signInWithPassword({ email, password });
+		if (error) {
+			console.error(error);
+			redirect(303, '/auth/error');
+		} else {
+			redirect(303, '/private');
 		}
+	},
+	signup: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = formData.get('email') as string;
+		const password = formData.get('password') as string;
 
-		return message(form, 'Form posted successfully!');
+		const { error } = await supabase.auth.signUp({ email, password });
+		if (error) {
+			console.error(error);
+			redirect(303, '/auth/error');
+		} else {
+			redirect(303, '/');
+		}
 	},
 	magiclink: async ({ request, locals: { supabase } }) => {
 		const form = await superValidate(request, zod(loginSchema));

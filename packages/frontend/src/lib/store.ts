@@ -16,5 +16,6 @@ export const startLocation = writable({
 });
 
 export const featureFlags = {
+	private: false,
 	dashboard: false
 };

@@ -8,7 +8,6 @@ const supabase: Handle = async ({ event, resolve }) => {
 
 	if (['.env', '/.git/config', 'ads.txt', 's3cmd.ini'].includes(event.url.pathname)) {
 		const ipAddress = event.request.headers.get('X-Forwarded-For') || event.getClientAddress();
-		console.log(ipAddress);
 
 		return Promise.resolve(
 			new Response('Forbidden', {
@@ -21,8 +20,8 @@ const supabase: Handle = async ({ event, resolve }) => {
 			})
 		);
 	}
-	let supabaseUrl = import.meta.env['SUPABASE_URL'];
-	let supabaseKey = import.meta.env['SUPABASE_ANON_KEY'];
+	let supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
+	let supabaseKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
 
 	event.locals.supabase = createServerClient(supabaseUrl, supabaseKey, {
 		cookies: {

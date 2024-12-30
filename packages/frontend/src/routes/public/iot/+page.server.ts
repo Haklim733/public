@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const appName = Resource.App.name;
 	const stage = Resource.App.stage;
 	// @ts-ignore
-	const sessionId = locals.user.sessionId!;
+	const sessionId = locals.user!;
 
 	return {
 		droneForm,

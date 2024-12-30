@@ -6,14 +6,7 @@ async function getConfig() {
 		plugins: [sveltekit()],
 		resolve: {},
 		optimizeDeps: {
-			exclude: [
-				'mqtt',
-				'ts-deepmerg',
-				'nanoid/non-secure',
-				'dequal',
-				'@floating-ui/dom',
-				'focus-trap'
-			] // Exclude the core package from pre-bundling
+			exclude: ['mqtt'] // Exclude the core package from pre-bundling
 		}
 	});
 }

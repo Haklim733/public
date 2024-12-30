@@ -17,11 +17,6 @@
 	import * as Tabs from '$lib/components/ui/tabs/index.ts';
 	import DatePickerWithRange from '$lib/components/date-picker-with-range.svelte';
 
-	export let data: {
-		user: {
-			authenticated: boolean;
-		};
-	};
 </script>
 
 <div class="md:hidden">
@@ -57,7 +52,6 @@
 				<Tabs.Trigger value="reports" disabled>Reports</Tabs.Trigger>
 				<Tabs.Trigger value="notifications" disabled>Notifications</Tabs.Trigger>
 			</Tabs.List>
-			{#if data.user.authenticated}
 				<Tabs.Content value="overview" class="space-y-4">
 					<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 						<Card.Root>
@@ -121,7 +115,6 @@
 						</Card.Root>
 					</div>
 				</Tabs.Content>
-			{/if}
 		</Tabs.Root>
 	</div>
 </div>

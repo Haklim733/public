@@ -7,8 +7,8 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 	 * session refresh.
 	 */
 	depends('supabase:auth');
-	let supabaseUrl = import.meta.env['SUPABASE_URL'];
-	let supabaseKey = import.meta.env['SUPABASE_ANON_KEY'];
+	let supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
+	let supabaseKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
 
 	const supabase = isBrowser()
 		? createBrowserClient(supabaseUrl, supabaseKey, {
@@ -40,5 +40,6 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 		data: { user }
 	} = await supabase.auth.getUser();
 
+	console.log(session, user);
 	return { session, supabase, user };
 };
